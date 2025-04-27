@@ -44,7 +44,7 @@ class Question(models.Model):
     is_active = models.BooleanField(default=True)
 
     def __str__(self):
-        return self.question_text.title()
+        return self.question_text
     
 
 from django.core.exceptions import ValidationError
