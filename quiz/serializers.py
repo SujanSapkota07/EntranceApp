@@ -4,16 +4,17 @@ from .models import Quiz, Question, Option
 class QuizSerializer(serializers.ModelSerializer):
     class Meta:
         model = Quiz
-        fields = "__all__"
-
-
-class QuestionSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Question
-        fields = "__all__"
-
+        fields = ["title", "id"]
 
 class OptionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Option
-        fields ="__all__"
+        fields =["option_text", "is_correct"]
+
+class QuestionSerializer(serializers.ModelSerializer):
+    options = OptionSerializer(many=True)
+    class Meta:
+        model = Question
+        fields = ["question_text", "options"]
+
+

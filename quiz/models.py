@@ -69,6 +69,21 @@ class Option(models.Model):
         if self.is_correct:
             if existing_options.filter(is_correct=True).exists():
                 raise ValidationError("Only one option can be marked as correct.")
+            
+         # ✅ 3. Ensure at least one correct option exists
+        # if not self.is_correct and existing_options.filter(is_correct=True).count() == 0:
+        #     raise ValidationError("There must be at least one correct option for the question.")
+
+        if not self.is_correct:
+            # Check if there are any existing correct options
+            correct_option_count = existing_options.filter(is_correct=True).count()
+            if self.is_correct:
+                correct_option_count += 1  # Include this option if it's marked correct
+            if existing_options.count() >= 3:
+                if correct_option_count == 0:
+                    raise ValidationError("At least one option must be marked as correct.")
+                
+
 
     def save(self, *args, **kwargs):
         self.clean()  # run validation before saving

@@ -26,6 +26,34 @@ def quiz_list(request):
 
 
 
+""" 
+this function now partially shows the qualities of the quiz. 
+makes a user ready for the quiz, shows details like number 
+of questions, created by, etc.
+"""
+
+# a function to show the details of a quiz
+@api_view(['GET'])  
+def quiz_glance(request, pk):
+    try:
+        quiz = Quiz.objects.get(pk=pk)
+    except Quiz.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+
+    # get all the questions from the object "quiz"
+    questions = quiz.questions.all()
+
+    data = {
+        "id": str(quiz.id),
+        "title": quiz.title,
+        "description": quiz.description,
+        "created_by": quiz.created_by.username,
+        "created_at": quiz.created_at,
+        "number_of_questions": questions.count()
+    }
+    return Response(data)
+
+
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 # when quiz_detail is called, it will show all the questions related to that quiz
@@ -106,4 +134,16 @@ def signup(request):
     user = User.objects.create_user(username=username, password=password)
     token, created = Token.objects.get_or_create(user=user)
     return Response({'token': token.key}, status=status.HTTP_201_CREATED)
+
+
+
+
+"""
+till here, quiz can be created, viewed, and searched by code.add
+login and signup functionality is done
+
+now what we have to do is to create a functionality to import or create quiz on the web app and to check the mcqs
+whether they are correct or not.
+we will create a new view for this.
+"""
 
