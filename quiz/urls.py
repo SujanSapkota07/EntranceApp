@@ -8,4 +8,9 @@ urlpatterns = [
 
     # When visiting /quizzes/<id>/, call quiz_detail() function with that id
     path('quiz/<uuid:pk>/', viewset.quiz_detail, name='quiz-detail'),
+
+    # landing page or page where we can enter the link or create new quiz
+    path('quiz/', viewset.quiz, name = 'quiz'),
+     path('login/', viewset.login, name='login'),
+    path('signup/', viewset.signup, name='signup'),
 ]
