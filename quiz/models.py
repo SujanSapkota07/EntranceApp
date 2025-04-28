@@ -2,6 +2,7 @@ from django.db import models
 import uuid
 from django.contrib.auth.models import AbstractUser
 
+from django.core.exceptions import ValidationError
 # Create your models here.
 # a quiz will uniquely identified by its uuid number. there will be no loger sets.
 
@@ -47,7 +48,6 @@ class Question(models.Model):
         return self.question_text
     
 
-from django.core.exceptions import ValidationError
 
 class Option(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)

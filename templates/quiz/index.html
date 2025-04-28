@@ -1,0 +1,310 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MCQ Quiz App</title>
+    <!-- Tailwind CSS via CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome via CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- If you later add local static files, you can reference them like this: -->
+    <!-- <link rel="stylesheet" href="{% static 'css/quiz.css' %}"> -->
+    <style>
+        .option {
+            transition: all 0.3s ease;
+        }
+        .option.correct {
+            background-color: #4ade80 !important;
+            color: white !important;
+        }
+        .option.incorrect {
+            background-color: #f87171 !important;
+            color: white !important;
+        }
+        .option.selected:not(.correct):not(.incorrect) {
+            background-color: #93c5fd !important;
+            color: white !important;
+        }
+        .fade-in {
+            animation: fadeIn 0.5s;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+    <div class="container mx-auto px-4 py-8 max-w-3xl">
+        <div class="bg-white rounded-xl shadow-md p-6 mb-8">
+            <h1 class="text-3xl font-bold text-center text-indigo-600 mb-6">MCQ Quiz App</h1>
+            
+            <div id="upload-section" class="mb-8">
+                <div class="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-lg p-8 bg-gray-50">
+                    <i class="fas fa-file-upload text-4xl text-indigo-500 mb-4"></i>
+                    <p class="text-gray-600 mb-4">Upload a text file containing MCQ questions</p>
+                    <input type="file" id="file-input" accept=".txt" class="hidden">
+                    <button id="upload-btn" class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-6 rounded-lg transition duration-200">
+                        Choose File
+                    </button>
+                    <p id="file-name" class="text-sm text-gray-500 mt-2 hidden"></p>
+                </div>
+                <p class="text-sm text-gray-500 mt-2 text-center">File format: Each question should be on a new line, followed by 4 options (prefixed with A), B), C), D)), and the correct answer marked with an asterisk (*)</p>
+            </div>
+
+            <div id="quiz-section" class="hidden">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-xl font-semibold text-gray-800">Question <span id="current-question">1</span>/<span id="total-questions">0</span></h2>
+                    <div class="flex space-x-2">
+                        <button id="prev-btn" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-1 px-4 rounded transition duration-200 disabled:opacity-50" disabled>
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <button id="next-btn" class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-1 px-4 rounded transition duration-200">
+                            Next <i class="fas fa-chevron-right ml-1"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div id="question-container" class="bg-white border border-gray-200 rounded-lg p-6 shadow-sm fade-in">
+                    <p id="question-text" class="text-lg font-medium text-gray-800 mb-6">No question loaded</p>
+                    
+                    <div class="space-y-3">
+                        <div class="option p-4 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50" data-option="A">
+                            <span class="font-medium">A)</span> <span id="option-a">Option A</span>
+                        </div>
+                        <div class="option p-4 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50" data-option="B">
+                            <span class="font-medium">B)</span> <span id="option-b">Option B</span>
+                        </div>
+                        <div class="option p-4 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50" data-option="C">
+                            <span class="font-medium">C)</span> <span id="option-c">Option C</span>
+                        </div>
+                        <div class="option p-4 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50" data-option="D">
+                            <span class="font-medium">D)</span> <span id="option-d">Option D</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="result-section" class="mt-6 hidden">
+                    <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+                        <div class="flex items-center">
+                            <i class="fas fa-check-circle text-green-500 text-xl mr-3"></i>
+                            <p class="text-green-800 font-medium">Correct! Well done.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- If you later separate JS into a static file, reference it like this: -->
+    <!-- <script src="{% static 'js/quiz.js' %}"></script> -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // DOM elements
+            const fileInput = document.getElementById('file-input');
+            const uploadBtn = document.getElementById('upload-btn');
+            const fileName = document.getElementById('file-name');
+            const quizSection = document.getElementById('quiz-section');
+            const uploadSection = document.getElementById('upload-section');
+            const questionText = document.getElementById('question-text');
+            const optionA = document.getElementById('option-a');
+            const optionB = document.getElementById('option-b');
+            const optionC = document.getElementById('option-c');
+            const optionD = document.getElementById('option-d');
+            const currentQuestionSpan = document.getElementById('current-question');
+            const totalQuestionsSpan = document.getElementById('total-questions');
+            const prevBtn = document.getElementById('prev-btn');
+            const nextBtn = document.getElementById('next-btn');
+            const resultSection = document.getElementById('result-section');
+            const options = document.querySelectorAll('.option');
+            
+            // Quiz data
+            let questions = [];
+            let currentQuestionIndex = 0;
+            let userAnswers = [];
+            
+            // Event listeners
+            uploadBtn.addEventListener('click', function() {
+                fileInput.click();
+            });
+            
+            fileInput.addEventListener('change', function(e) {
+                if (e.target.files.length > 0) {
+                    const file = e.target.files[0];
+                    fileName.textContent = file.name;
+                    fileName.classList.remove('hidden');
+                    
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const content = e.target.result;
+                        parseQuestions(content);
+                    };
+                    reader.readAsText(file);
+                }
+            });
+            
+            options.forEach(option => {
+                option.addEventListener('click', function() {
+                    if (questions.length === 0) return;
+                    
+                    const selectedOption = this.dataset.option;
+                    const currentQuestion = questions[currentQuestionIndex];
+                    
+                    // Mark all options
+                    options.forEach(opt => {
+                        opt.classList.remove('selected');
+                        if (opt.dataset.option === currentQuestion.correctAnswer) {
+                            opt.classList.add('correct');
+                        } else if (opt.dataset.option === selectedOption && selectedOption !== currentQuestion.correctAnswer) {
+                            opt.classList.add('incorrect');
+                        }
+                    });
+                    
+                    // Mark selected option
+                    this.classList.add('selected');
+                    
+                    // Store user answer
+                    userAnswers[currentQuestionIndex] = selectedOption;
+                    
+                    // Show result if correct
+                    if (selectedOption === currentQuestion.correctAnswer) {
+                        resultSection.classList.remove('hidden');
+                    } else {
+                        resultSection.classList.add('hidden');
+                    }
+                    
+                    // Enable next button
+                    nextBtn.disabled = false;
+                });
+            });
+            
+            prevBtn.addEventListener('click', function() {
+                if (currentQuestionIndex > 0) {
+                    currentQuestionIndex--;
+                    showQuestion();
+                }
+            });
+            
+            nextBtn.addEventListener('click', function() {
+                if (currentQuestionIndex < questions.length - 1) {
+                    currentQuestionIndex++;
+                    showQuestion();
+                } else {
+                    // Quiz completed
+                    alert('Quiz completed!');
+                }
+            });
+            
+            // Functions
+            function parseQuestions(content) {
+                const lines = content.split('\n').filter(line => line.trim() !== '');
+                questions = [];
+                
+                for (let i = 0; i < lines.length; i += 5) {
+                    if (i + 4 >= lines.length) break; // Ensure we have question + 4 options
+                    
+                    const question = lines[i].trim();
+                    const options = [
+                        lines[i+1].trim(),
+                        lines[i+2].trim(),
+                        lines[i+3].trim(),
+                        lines[i+4].trim()
+                    ];
+                    
+                    // Find correct answer (marked with *)
+                    let correctAnswer = '';
+                    const processedOptions = options.map(opt => {
+                        if (opt.includes('*')) {
+                            const letter = opt.split(')')[0];
+                            correctAnswer = letter.replace('*', '').trim();
+                            return opt.replace('*', '').trim();
+                        }
+                        return opt;
+                    });
+                    
+                    questions.push({
+                        text: question,
+                        options: processedOptions,
+                        correctAnswer: correctAnswer
+                    });
+                }
+                
+                if (questions.length > 0) {
+                    // Initialize user answers array
+                    userAnswers = new Array(questions.length).fill(null);
+                    
+                    // Show quiz section
+                    uploadSection.classList.add('hidden');
+                    quizSection.classList.remove('hidden');
+                    
+                    // Update question count
+                    totalQuestionsSpan.textContent = questions.length;
+                    
+                    // Show first question
+                    showQuestion();
+                } else {
+                    alert('No valid questions found in the file. Please check the format.');
+                }
+            }
+            
+            function showQuestion() {
+                const question = questions[currentQuestionIndex];
+                
+                // Update question text
+                questionText.textContent = question.text;
+                
+                // Update options
+                optionA.textContent = question.options[0].substring(2).trim();
+                optionB.textContent = question.options[1].substring(2).trim();
+                optionC.textContent = question.options[2].substring(2).trim();
+                optionD.textContent = question.options[3].substring(2).trim();
+                
+                // Update question counter
+                currentQuestionSpan.textContent = currentQuestionIndex + 1;
+                
+                // Reset option styles
+                options.forEach(option => {
+                    option.classList.remove('selected', 'correct', 'incorrect');
+                });
+                
+                // Hide result section
+                resultSection.classList.add('hidden');
+                
+                // Update navigation buttons
+                prevBtn.disabled = currentQuestionIndex === 0;
+                nextBtn.disabled = userAnswers[currentQuestionIndex] === null;
+                
+                // If user already answered this question, show their answer
+                if (userAnswers[currentQuestionIndex] !== null) {
+                    const selectedOption = document.querySelector(`.option[data-option=\"${userAnswers[currentQuestionIndex]}\"]`);
+                    if (selectedOption) {
+                        selectedOption.classList.add('selected');
+                        
+                        // Show correct/incorrect if answered
+                        options.forEach(opt => {
+                            if (opt.dataset.option === question.correctAnswer) {
+                                opt.classList.add('correct');
+                            } else if (opt.dataset.option === userAnswers[currentQuestionIndex] && userAnswers[currentQuestionIndex] !== question.correctAnswer) {
+                                opt.classList.add('incorrect');
+                            }
+                        });
+                        
+                        // Show result if correct
+                        if (userAnswers[currentQuestionIndex] === question.correctAnswer) {
+                            resultSection.classList.remove('hidden');
+                        }
+                    }
+                }
+                
+                // Add fade-in animation
+                const container = document.getElementById('question-container');
+                container.classList.remove('fade-in');
+                void container.offsetWidth; // Trigger reflow
+                container.classList.add('fade-in');
+            }
+        });
+    </script>
+</body>
+</html>

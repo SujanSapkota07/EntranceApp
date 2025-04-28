@@ -1,4 +1,5 @@
 # Import the necessary decorators and functions from DRF
+from django.shortcuts import render
 from rest_framework.decorators import api_view, permission_classes   
 from rest_framework.permissions import IsAuthenticated  # To make views support HTTP methods like GET, POST etc.
 from rest_framework.response import Response           # To send HTTP responses in JSON format
@@ -54,6 +55,9 @@ def quiz_glance(request, pk):
     return Response(data)
 
 
+
+
+
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 # when quiz_detail is called, it will show all the questions related to that quiz
@@ -70,6 +74,8 @@ def quiz_detail(request, pk):
 
 
 
+""" this is the main function for the quiz app. 
+it will show the landing page of the quiz app."""
 @api_view(['GET', 'POST'])
 def quiz(request):
     if request.method == 'GET':
@@ -147,3 +153,88 @@ whether they are correct or not.
 we will create a new view for this.
 """
 
+# bulk upload from provious quiz project
+
+# viewset.py
+
+# @api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def import_quiz(request):
+    """
+    Expects a file upload (multipart/form-data) under 'file'.
+    The .txt must have MCQ blocks like:
+       Question text…
+       A. option1
+       B. option2
+       C. option3
+       D. option4
+
+       ANSWER: C
+
+    The filename (without .txt) becomes the Quiz.title.
+    """
+    # 1️⃣ Grab the uploaded file
+    if request.method == 'GET':
+        uploaded = request.FILES.get('file')
+        if not uploaded or not uploaded.name.endswith('.txt'):
+            return Response(
+                {'error': 'A .txt file is required under “file”.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # 2️⃣ Create the Quiz
+
+        quiz = Quiz.objects.create(
+            title=f'unknown file by {request.user.username}',
+            description='',              
+            created_by=request.user
+        )
+
+        # 3️⃣ Read and normalize lines
+        content = uploaded.read().decode('utf-8')
+        lines = [ln.strip() for ln in content.splitlines()]
+
+        # 4️⃣ Split into blocks (one block = one question + options + ANSWER)
+        blocks, current = [], []
+        for ln in lines:
+            if ln == '' and current:
+                blocks.append(current)
+                current = []
+            elif ln != '':
+                current.append(ln)
+        if current:
+            blocks.append(current)
+
+        # 5️⃣ Parse each block
+        for blk in blocks:
+            # a) Find and remove the ANSWER line
+            answer_line = next((l for l in blk if l.upper().startswith('ANSWER')), None)
+            if not answer_line:
+                # skip malformed block
+                continue
+            correct_letter = answer_line.split(':', 1)[1].strip().upper()
+            blk = [l for l in blk if not l.upper().startswith('ANSWER')]
+
+            # b) First line is the question text
+            question_text = blk[0]
+            q = Question.objects.create(quiz=quiz, question_text=question_text)
+
+            # c) Next lines starting with A., B., C., D. are options
+            for opt_line in blk[1:]:
+                if len(opt_line) < 2 or opt_line[1] != '.':
+                    continue
+                letter = opt_line[0].upper()
+                text = opt_line[2:].strip()
+                is_correct = (letter == correct_letter)
+                Option.objects.create(
+                    question=q,
+                    option_text=text,
+                    is_correct=is_correct
+                )
+
+        # 6️⃣ Return the newly created quiz
+        # return Response(
+        #     {'quiz_id': str(quiz.id), 'title': quiz.title},
+        #     status=status.HTTP_201_CREATED
+        # )
+        return render(request, 'quiz/index.html', {'quiz': quiz})

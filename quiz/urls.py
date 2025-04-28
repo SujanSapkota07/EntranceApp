@@ -12,6 +12,8 @@ urlpatterns = [
 
     # landing page or page where we can enter the link or create new quiz
     path('quiz/', viewset.quiz, name = 'quiz'),
-     path('login/', viewset.login, name='login'),
+    path('login/', viewset.login, name='login'),
     path('signup/', viewset.signup, name='signup'),
+
+    path('quiz/import/', viewset.import_quiz, name='quiz-import'),
 ]
