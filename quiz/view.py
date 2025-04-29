@@ -84,6 +84,7 @@ def signup_user(request):
 
     return render(request, "quiz/login.html")
 
+""" logout """
 def logout_user(request):
     logout(request)
     return redirect('home')  # Change 'home' to your home page route
@@ -91,8 +92,46 @@ def logout_user(request):
 def find_quiz(request):
     pass
 
+""" creating a new quiz """
 def create_quiz(request):
-    pass
+    return render(request, 'quiz/create_quiz.html')
+
+
+""" this is the dashboard of the quiz app."""
+from django.db.models import Count
+def dashboard(request):
+    if request.method == 'GET':
+        user = request.user
+        quizzes = Quiz.objects.filter(created_by=user).annotate(question_count=Count('questions'))
+
+        context = {
+            'quizzes': quizzes,
+            'user': user,
+        }
+
+    return render(request, 'quiz/dashboard.html', context)
+
+def edit_quiz(request, quiz_id):
+    # Fetch the quiz object
+    try:
+        quiz = Quiz.objects.get(id=quiz_id)
+    except Quiz.DoesNotExist:
+        return HttpResponse("Quiz not found", status=404)
+    # Check if the user is the creator of the quiz
+    if quiz.created_by != request.user:
+        return HttpResponse("You are not authorized to edit this quiz", status=403)
+    # Render the edit quiz page
+    return render(request, 'quiz/edit_quiz.html', {'quiz': quiz})
+
+
+from .utils import import_quiz_from_file
+def upload_quiz(request):
+    if request.method == 'POST' and request.FILES.get('file'):
+        file = request.FILES['file']
+        user = request.user  # Assuming user is authenticated
+        import_quiz_from_file(file, user)
+        return redirect('home')  # or wherever you want
+    return render(request, 'quiz/upload.html')
 
 
 # # here we will create endpoint for our quiz app

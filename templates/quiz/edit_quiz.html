@@ -1,0 +1,165 @@
+{%load static%}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Management Dashboard</title>
+    <style>
+        /* Django Developers: CSS can be moved to separate file or kept in base template */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 2rem;
+            color: #333;
+        }
+
+        .back-link {
+            text-decoration: none;
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+            display: block;
+        }
+
+        .quiz-header h1 {
+            margin: 1rem 0 0.5rem 0;
+            color: #2c3e50;
+        }
+
+        .quiz-details table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+            background: #f8f9fa;
+        }
+
+        .quiz-details td, .quiz-details th {
+            border: 1px solid #dee2e6;
+            padding: 0.75rem;
+            text-align: left;
+        }
+
+        .questions-section {
+            margin-top: 2rem;
+        }
+
+        .question-block {
+            border-bottom: 2px solid #eee;
+            padding: 1.5rem 0;
+        }
+
+        .question-text {
+            font-weight: 500;
+            margin-bottom: 1rem;
+            color: #2c3e50;
+        }
+
+        .option-list {
+            list-style: none;
+            padding: 0;
+            margin: 0 0 1rem 0;
+        }
+
+        .option-item {
+            margin: 0.5rem 0;
+            padding: 0.5rem;
+            background: #f8f9fa;
+            border-radius: 4px;
+        }
+
+        .add-option {
+            color: #007bff;
+            text-decoration: none;
+            font-size: 0.9rem;
+            cursor: pointer;
+        }
+
+        .save-section {
+            margin: 2rem 0;
+            padding-top: 1rem;
+            border-top: 2px solid #eee;
+        }
+
+        .save-button {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .debug-check {
+            margin: 1rem 0;
+        }
+
+        .status-badge {
+            background: #e3fcef;
+            color: #006644;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.85rem;
+        }
+    </style>
+</head>
+<body>
+
+    <a href="{%url 'dashboard'%}" class="back-link">‹ Back to quizzes</a>
+
+    <div class="quiz-header">
+        <!-- Django: Use {{ quiz.title }} -->
+        <h1>{{quiz.title}}</h1>
+        <!-- Django: Use {{ quiz.description }} -->
+        <!-- <p>Test your general knowledge with this fun quiz!</p> -->
+    </div>
+
+    
+
+    <div class="questions-section">
+        <h3>Questions</h3>
+
+        <!-- Django: Start loop {% for question in questions %} -->
+        <div class="question-block">
+            <!-- Django: Use {{ question.text }} -->
+            <div class="question-text">Q1: What is the capital of Frı</div>
+            <ul class="option-list">
+                <!-- Django: {% for option in question.options %} -->
+                <li class="option-item">
+                    <input type="radio" name="q1" id="q1o1">
+                    <label for="q1o1">London</label>
+                </li>
+                <!-- Repeat for other options -->
+                <!-- Django: {% endfor %} -->
+            </ul>
+            <a class="add-option">+ Add Option</a>
+        </div>
+
+        <!-- Repeat question block for each question -->
+        <div class="question-block">
+            <div class="question-text">Q2: Which planet is known a</div>
+            <ul class="option-list">
+                <li class="option-item">
+                    <input type="radio" name="q2" id="q2o1">
+                    <label for="q2o1">Venus</label>
+                </li>
+                <!-- Other options -->
+            </ul>
+            <a class="add-option">+ Add Option</a>
+        </div>
+        <!-- Django: {% endfor %} -->
+    </div>
+
+    <div class="save-section">
+        <button class="save-button">Save Changes</button>
+        <div class="debug-check">
+            <input type="checkbox" id="debug">
+            <label for="debug">Debug Quiz</label>
+        </div>
+    </div>
+
+    <!-- Django: Add proper link/button for new quiz creation -->
+    <div class="new-quiz">
+        <p>Crosses New Quiz</p>
+    </div>
+</body>
+</html>

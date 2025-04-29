@@ -151,7 +151,7 @@
 <body>
     <!-- Main Form - This will be submitted to your Django backend -->
     <!-- REPLACE URL: Update the action attribute with your Django URL pattern -->
-    <form id="uploadForm" action="{% url 'your_view_name' %}" method="post" enctype="multipart/form-data">
+    <form id="uploadForm" action="{% url 'upload_quiz' %}" method="post" enctype="multipart/form-data">
         <!-- CSRF Token - Required for Django forms -->
         {% csrf_token %}
         
@@ -176,16 +176,16 @@
                             <path d="M10 18h4"></path>
                         </svg>
                     </div>
-                    <div class="text">+ upload CSV File</div>
+                    <div class="text">+ Upload Text File</div>
                     
                     <!-- This is the actual file input that will be hidden but functional -->
                     <!-- CUSTOMIZE: You can change the name attribute to match your Django form field -->
-                    <input type="file" id="csvFile" name="csv_file" class="file-input" accept=".csv">
+                    <input type="file" id="csvFile" name="file" class="file-input" accept=".txt">
                 </label>
                 
                 <!-- Manual Creation Option -->
                 <!-- REPLACE URL: Update the onClick handler with your Django URL for manual creation -->
-                <div class="upload-option" id="manualOption" onclick="window.location.href='{% url 'your_manual_creation_view' %}'">
+                <div class="upload-option" id="manualOption" onclick="window.location.href='{% url 'dashboard' %}';">
                     <div class="icon manual-icon">
                         <!-- SVG for Manual Creation Icon - You can replace with your own icon -->
                         <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -194,7 +194,7 @@
                             <line x1="8" y1="12" x2="16" y2="12"></line>
                         </svg>
                     </div>
-                    <div class="text">Create manually</div>
+                    <div class="text">Create or edit manually</div>
                 </div>
             </div>
             
@@ -242,11 +242,11 @@
             
             // AJAX implementation would go here if you want to handle the upload without page refresh
             // Example:
-            /*
-            event.preventDefault();
+            
+            // event.preventDefault();
             const formData = new FormData(this);
             
-            fetch('{% url "your_view_name" %}', {
+            fetch('{% url "home" %}', {
                 method: 'POST',
                 body: formData,
                 headers: {
@@ -269,7 +269,7 @@
                 errorMessage.style.display = 'block';
                 successMessage.style.display = 'none';
             });
-            */
+            
         });
     </script>
 </body>

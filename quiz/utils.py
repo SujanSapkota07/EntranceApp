@@ -1,77 +1,56 @@
-# utils.py
-
+import re
 from .models import Quiz, Question, Option
 
 
-
-
-""" 
-this function is to import quiz from a file
-    the file should be in the following format:
-    Question 1  
-    A. option 1
-    B. option 2
-    C. option 3
-    D. option 4 
-    ANSWER: A
-    
-    """
 def import_quiz_from_file(file_obj, created_by_user):
-    content = file_obj.read().decode('utf-8')  
-    lines = content.split('\n')
-    lines = [line.strip() for line in lines if line.strip()]  # clean empty lines
+    print("Importing quiz from file...")
+    content = file_obj.read().decode('utf-8')
+    lines = content.strip().split('\n')
 
-    # Create Quiz
+    # Clean lines
+    lines = [line.strip() for line in lines if line.strip()]
+
+    # Create the quiz
     quiz = Quiz.objects.create(
         title="Imported Quiz",
         description="Quiz imported from file.",
         created_by=created_by_user
     )
+    print(f"Created quiz: {quiz.title}, ID: {quiz.id}")
 
     i = 0
     while i < len(lines):
-        line = lines[i]
-        
-        # Handle a question line
-        if not (line.startswith('A.') or line.startswith('A)') or line.startswith('A:')) and not line.startswith('ANSWER:'):
-            question_text = line
-            i += 1
+        question_text = lines[i]
+        i += 1
 
-            options = []
-            for _ in range(4):
-                if i < len(lines):
-                    opt_line = lines[i]
-                    if opt_line[1] in [')', '.', ':']:
-                        option_text = opt_line[2:].strip()
-                        options.append(option_text)
-                        i += 1
-                    else:
-                        break
-                else:
-                    break
-
-            # Get ANSWER
-            if i < len(lines) and lines[i].startswith('ANSWER:'):
-                answer_line = lines[i]
-                correct_letter = answer_line.split(':')[1].strip().upper()
+        # Get 4 options
+        options = []
+        while i < len(lines) and len(options) < 4:
+            match = re.match(r'([A-D])[.)-]?\s+(.*)', lines[i])
+            if match:
+                options.append((match.group(1).strip().upper(), match.group(2).strip()))
                 i += 1
             else:
-                correct_letter = None
+                break
 
-            # Save Question
-            question = Question.objects.create(
-                quiz=quiz,
-                question_text=question_text
+        # Get the correct answer
+        correct_letter = None
+        if i < len(lines) and lines[i].startswith('ANSWER:'):
+            correct_letter = lines[i].split(':')[1].strip().upper()
+            i += 1
+
+        # Save question
+        question = Question.objects.create(
+            quiz=quiz,
+            question_text=question_text
+        )
+
+        # Save options
+        for opt_letter, opt_text in options:
+            is_correct = (opt_letter == correct_letter)
+            Option.objects.create(
+                question=question,
+                option_text=opt_text,
+                is_correct=is_correct
             )
 
-            # Save Options
-            letters = ['A', 'B', 'C', 'D']
-            for idx, option_text in enumerate(options):
-                is_correct = (letters[idx] == correct_letter)
-                Option.objects.create(
-                    question=question,
-                    option_text=option_text,
-                    is_correct=is_correct
-                )
-        else:
-            i += 1  # skip bad lines

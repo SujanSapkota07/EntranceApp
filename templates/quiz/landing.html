@@ -280,9 +280,12 @@
                     <button type="submit" class="search-button">Find</button>
                     
                     <!-- Create New Quiz Button - Update with your Django URL name -->
+
+                    {% if user.is_authenticated %}
                     <a href="{% url 'create_quiz' %}" class="create-new-button">
                         <span>+</span> Create New
                     </a>
+                    {% endif %}
                 </form>
             </div>
 
