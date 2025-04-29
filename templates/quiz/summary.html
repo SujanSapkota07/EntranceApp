@@ -1,0 +1,35 @@
+<h2>Summary</h2>
+<table border="1">
+  <tr>
+    <th>Question</th>
+    <th>Your Answer</th>
+    <th>Correct Answer</th>
+    <th>Status</th>
+  </tr>
+  {% for question, selected_option in user_answers %}
+  <tr>
+    <td>{{ question.question_text }}</td>
+    <td>
+      {% if selected_option %}
+        {{ selected_option.option_text }}
+      {% else %}
+        Not Answered
+      {% endif %}
+    </td>
+    <td>
+      {% for option in question.options.all %}
+        {% if option.is_correct %}
+          {{ option.option_text }}
+        {% endif %}
+      {% endfor %}
+    </td>
+    <td>
+      {% if selected_option and selected_option.is_correct %}
+        ✅ Correct
+      {% else %}
+        ❌ Wrong
+      {% endif %}
+    </td>
+  </tr>
+  {% endfor %}
+</table>

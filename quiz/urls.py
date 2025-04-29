@@ -1,6 +1,5 @@
 from django.urls import path            # Django's function to define URL patterns
-from . import viewset                    # Import our views.py file from the current app
-
+from . import viewset              
 # Define URL patterns for quiz endpoints
 urlpatterns = [
     # When visiting /quizzes/, call quiz_list() function
@@ -8,6 +7,7 @@ urlpatterns = [
 
     # When visiting /quizzes/<id>/, call quiz_detail() function with that id
     path('quiz/<uuid:pk>/', viewset.quiz_detail, name='quiz-detail'),
+    # path('quiz_view/<uuid:pk>/', viewset.quiz_view, name='quiz-detail'),
     path('quiz/glance/<uuid:pk>/', viewset.quiz_glance, name='quiz-glance'),
 
     # landing page or page where we can enter the link or create new quiz
@@ -15,5 +15,19 @@ urlpatterns = [
     path('login/', viewset.login, name='login'),
     path('signup/', viewset.signup, name='signup'),
 
-    path('quiz/import/', viewset.import_quiz, name='quiz-import'),
+path('import_quiz/', viewset.import_quiz, name='import-quiz'),
+
+
+
+
+
+
+
+
+
+
+
+# BY CHATGPT
+    # path('upload/', viewset.upload_mcqs, name='upload_mcqs'),
+    # path('play/', viewset.play_mcqs, name='play_mcqs'),
 ]

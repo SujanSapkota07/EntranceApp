@@ -1,0 +1,120 @@
+
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MCQ Quiz</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .option {
+            transition: all 0.3s ease;
+        }
+        .option.selected.correct {
+            background-color: #4ade80;
+            color: white;
+        }
+        .option.selected.incorrect {
+            background-color: #f87171;
+            color: white;
+        }
+        .option:hover {
+            background-color: #f3f4f6;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen flex items-center justify-center p-4">
+    <div class="bg-white rounded-xl shadow-md p-8 max-w-md w-full">
+        <h1 class="text-2xl font-bold text-gray-800 mb-6">Quiz Question</h1>
+        
+        <!-- Dynamically Render Question -->
+        <div id="question-container">
+            <p class="text-lg font-medium text-gray-700" id="question-text">{{ question.question_text }}</p>
+        </div>
+        
+        <div class="space-y-3 mb-6" id="options-container">
+            {% for option in question.options.all %}
+                <div class="option p-4 border border-gray-200 rounded-lg cursor-pointer" data-correct="{{ option.is_correct }}">
+                    <span class="font-medium">a.</span> {{ option.option_text }}
+                </div>
+            {% endfor %}
+        </div>
+        
+        <div id="feedback" class="hidden p-4 rounded-lg bg-green-50 text-green-800 font-medium">
+            <p>Correct! Well done.</p>
+        </div>
+
+        <!-- Next Button -->
+        <button id="next-btn" class="mt-4 p-2 bg-blue-500 text-white rounded-lg" onclick="nextQuestion()">Next</button>
+    </div>
+
+    <script>
+        let currentQuestionIndex = 0;  // Track the current question index
+        const questions = {{ questions_json|safe }}; // Pass all questions data from Django
+
+        // Function to load the current question and options
+        function loadQuestion(index) {
+            const question = questions[index];
+            const questionTextElement = document.getElementById('question-text');
+            const optionsContainer = document.getElementById('options-container');
+            const feedback = document.getElementById('feedback');
+            
+            // Clear previous options
+            optionsContainer.innerHTML = '';
+
+            // Set the question text
+            questionTextElement.textContent = question.question_text;
+            
+            // Add options dynamically
+            question.options.forEach(option => {
+                const optionElement = document.createElement('div');
+                optionElement.classList.add('option', 'p-4', 'border', 'border-gray-200', 'rounded-lg', 'cursor-pointer');
+                optionElement.setAttribute('data-correct', option.is_correct);
+
+                optionElement.innerHTML = `<span class="font-medium">${option.letter})</span> ${option.option_text}`;
+                
+                optionElement.addEventListener('click', function() {
+                    // Remove previous selections
+                    document.querySelectorAll('.option').forEach(opt => {
+                        opt.classList.remove('selected', 'correct', 'incorrect');
+                    });
+
+                    // Mark the selected option
+                    optionElement.classList.add('selected');
+
+                    // Check if correct
+                    const isCorrect = optionElement.dataset.correct === 'true';
+                    if (isCorrect) {
+                        optionElement.classList.add('correct');
+                        feedback.classList.remove('hidden');
+                    } else {
+                        optionElement.classList.add('incorrect');
+                        feedback.classList.add('hidden');
+
+                        // Highlight the correct answer
+                        const correctOption = document.querySelector('.option[data-correct="true"]');
+                        correctOption.classList.add('correct');
+                    }
+                });
+
+                optionsContainer.appendChild(optionElement);
+            });
+        }
+
+        // Function to move to the next question
+        function nextQuestion() {
+            if (currentQuestionIndex < questions.length - 1) {
+                currentQuestionIndex++;
+                loadQuestion(currentQuestionIndex);
+            } else {
+                alert("You've completed the quiz!");
+                // Optionally, submit the quiz or navigate somewhere else
+            }
+        }
+
+        // Initial load of the first question
+        loadQuestion(currentQuestionIndex);
+    </script>
+</body>
+</html>
