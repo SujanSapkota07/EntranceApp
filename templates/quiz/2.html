@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CustomQZ - Quiz Details</title>
+    <style>
+        /* ===== GLOBAL STYLES ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f7f7f7;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ===== HEADER STYLES ===== */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 50px;
+            background-color: white;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Logo container styling */
+        .logo-container {
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+        }
+
+        .logo {
+            height: 40px;
+            margin-right: 10px;
+        }
+
+        .logo-text {
+            font-size: 24px;
+            font-weight: bold;
+            color: #3478F6;
+            text-decoration: none;
+        }
+
+        /* User profile styling */
+        .user-profile {
+            display: flex;
+            align-items: center;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: #3478F6;
+            margin-right: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        .user-name {
+            color: #666;
+            margin-right: 15px;
+            font-size: 16px;
+        }
+
+        .icon-button {
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: #666;
+            cursor: pointer;
+            margin-left: 15px;
+        }
+
+        /* ===== MAIN CONTENT STYLES ===== */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+        }
+
+        .quiz-container {
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 900px;
+            padding: 30px;
+            margin-top: 20px;
+        }
+
+        .quiz-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 30px;
+        }
+
+        .quiz-title {
+            font-size: 24px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .quiz-id {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .quiz-content {
+            display: flex;
+            gap: 30px;
+        }
+
+        .quiz-banner {
+            flex: 0 0 45%;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            height: 300px;
+            overflow: hidden;
+        }
+
+        .banner-text {
+            font-size: 48px;
+            color: #e8f0fe;
+            font-weight: bold;
+            text-align: center;
+            line-height: 1.2;
+        }
+
+        .quiz-details {
+            flex: 0 0 50%;
+        }
+
+        .detail-row {
+            margin-bottom: 20px;
+        }
+
+        .detail-label {
+            font-size: 16px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .detail-value {
+            font-size: 18px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: 500;
+            font-size: 16px;
+        }
+
+        .status-live {
+            background-color: #ffebe8;
+            color: #ff6b6b;
+        }
+
+        .quiz-manager {
+            margin-top: 20px;
+        }
+
+        .manager-label {
+            font-size: 16px;
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .manager-profile {
+            display: flex;
+            align-items: center;
+        }
+
+        .manager-avatar {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background-color: #3478F6;
+            margin-right: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .manager-name {
+            color: #333;
+            font-size: 16px;
+        }
+
+        .quiz-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .btn {
+            padding: 10px 30px;
+            border-radius: 30px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+        }
+
+        .btn-outline {
+            background-color: white;
+            border: 1px solid #ddd;
+            color: #666;
+        }
+
+        .btn-primary {
+            background-color: #3478F6;
+            border: none;
+            color: white;
+        }
+
+        .btn-icon {
+            margin-right: 8px;
+            font-size: 18px;
+        }
+
+        .page-info {
+            text-align: center;
+            margin-top: 20px;
+            color: #666;
+            font-size: 14px;
+        }
+
+        /* ===== RESPONSIVE STYLES ===== */
+        @media (max-width: 768px) {
+            .header {
+                padding: 15px 20px;
+            }
+
+            .quiz-header {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .quiz-content {
+                flex-direction: column;
+            }
+
+            .quiz-banner {
+                height: 200px;
+            }
+
+            .quiz-actions {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header Section -->
+    <!-- This section contains the logo and user profile information -->
+    <header class="header">
+        <!-- Logo and Site Name - Replace with your Django static files path -->
+        <a href="{% url 'home' %}" class="logo-container">
+            <!-- Django Template Tag for Static Files - Update with your actual logo path -->
+            <img src="{% static 'images/logo.svg' %}" alt="CustomQZ Logo" class="logo">
+            <span class="logo-text">CustomQZ</span>
+        </a>
+
+        <!-- User Profile Section - This will display the logged-in user -->
+        <div class="user-profile">
+            <!-- User Avatar - First letter of user's name -->
+            <div class="user-avatar">
+                <!-- Django template variable for user's first letter -->
+                {{ user.first_name|first|upper }}
+            </div>
+            <!-- User Name - Django template variable -->
+            <span class="user-name">
+                <!-- Use Django template variables for user's full name -->
+                {{ user.get_full_name }}
+            </span>
+            <button class="icon-button">ⓘ</button>
+            <button class="icon-button">⚙️</button>
+        </div>
+    </header>
+
+    <!-- Main Content Section -->
+    <main class="main-content">
+        <!-- Quiz Details Container -->
+        <div class="quiz-container">
+            <!-- Quiz Header: Title and ID -->
+            <div class="quiz-header">
+                <h1 class="quiz-title">
+                    <!-- Quiz Title - Django template variable -->
+                    {{ quiz.title }}
+                </h1>
+                <div class="quiz-id">
+                    <!-- Quiz ID - Django template variable -->
+                    Quiz ID: {{ quiz.id }}
+                </div>
+            </div>
+
+            <!-- Quiz Content Section -->
+            <div class="quiz-content">
+                <!-- Quiz Banner/Image -->
+                <div class="quiz-banner">
+                    <!-- Placeholder text for banner -->
+                    <div class="banner-text">
+                        Quiz<br>Banner
+                    </div>
+                </div>
+
+                <!-- Quiz Details -->
+                <div class="quiz-details">
+                    <!-- Status - Using is_active field -->
+                    <div class="detail-row">
+                        <div class="detail-label">Status</div>
+                        <div class="detail-value">
+                            <!-- Dynamic status badge based on quiz is_active -->
+                            <span class="status-badge status-{{ quiz.is_active|yesno:'live,inactive' }}">
+                                {{ quiz.is_active|yesno:'Live,Inactive' }}
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Number of Questions - Count questions related to this quiz -->
+                    <div class="detail-row">
+                        <div class="detail-label">No of Question</div>
+                        <div class="detail-value">
+                            {{ quiz.questions.count }}
+                        </div>
+                    </div>
+
+                    <!-- Quiz Date - Using created_at field -->
+                    <div class="detail-row">
+                        <div class="detail-label">Quiz Date</div>
+                        <div class="detail-value">
+                            {{ quiz.created_at|date:"d-m-Y" }}
+                        </div>
+                    </div>
+
+                    <!-- Start Time - This isn't in your model, using placeholder -->
+                    <div class="detail-row">
+                        <div class="detail-label">Start Time</div>
+                        <div class="detail-value">
+                            <!-- You might want to add start_time and end_time fields to your Quiz model -->
+                            01:00 PM
+                        </div>
+                    </div>
+
+                    <!-- End Time - This isn't in your model, using placeholder -->
+                    <div class="detail-row">
+                        <div class="detail-label">End Time</div>
+                        <div class="detail-value">
+                            02:00 PM
+                        </div>
+                    </div>
+
+                    <!-- Quiz Manager - Using created_by field -->
+                    <div class="quiz-manager">
+                        <div class="manager-label">Quiz Manager</div>
+                        <div class="manager-profile">
+                            <div class="manager-avatar">
+                                {{ quiz.created_by.first_name|first|upper }}
+                            </div>
+                            <div class="manager-name">
+                                {{ quiz.created_by.get_full_name }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quiz Actions -->
+            <div class="quiz-actions">
+                <!-- Edit Button - Only visible to quiz creator or admins -->
+                {% if user == quiz.created_by or user.is_staff %}
+                <a href="{% url 'edit_quiz' quiz.id %}" class="btn btn-outline">
+                    <span class="btn-icon">✏️</span> Edit
+                </a>
+                {% endif %}
+                
+                <!-- Join Button - For participants -->
+                <a href="{% url 'join_quiz' quiz.id %}" class="btn btn-primary">
+                    Join
+                </a>
+            </div>
+        </div>
+
+        <!-- Page Information -->
+        <div class="page-info">
+            Popup after quiz code ( active i.e. the quiz is running )page manager page
+        </div>
+    </main>
+</body>
+</html>

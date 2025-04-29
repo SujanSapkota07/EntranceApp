@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CustomQZ - Login/Signup</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .container {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            width: 400px;
+            padding: 30px;
+            text-align: center;
+        }
+        .logo {
+            margin-bottom: 20px;
+        }
+        .logo img {
+            height: 40px;
+        }
+        .tabs {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            font-weight: bold;
+            color: #666;
+            border-bottom: 2px solid transparent;
+        }
+        .tab.active {
+            color: #3273dc;
+            border-bottom: 2px solid #3273dc;
+        }
+        .form {
+            display: none;
+        }
+        .form.active {
+            display: block;
+        }
+        input {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            margin: 20px 0 10px;
+            background-color: #3273dc;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #2366c0;
+        }
+        .divider {
+            display: flex;
+            align-items: center;
+            margin: 20px 0;
+        }
+        .divider-line {
+            flex-grow: 1;
+            height: 1px;
+            background-color: #ddd;
+        }
+        .divider-text {
+            padding: 0 15px;
+            color: #666;
+        }
+        .google-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: white;
+            border: 1px solid #ddd;
+            color: #444;
+        }
+        .google-btn img {
+            height: 20px;
+            margin-right: 10px;
+        }
+        .footer {
+            margin-top: 20px;
+            font-size: 14px;
+            color: #666;
+        }
+        .footer a {
+            color: #3273dc;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">
+            <svg width="200" height="50" viewBox="0 0 300 50">
+                <g>
+                    <!-- QZ Logo -->
+                    <circle cx="25" cy="25" r="20" fill="#3273dc" stroke="#3273dc" stroke-width="2"/>
+                    <text x="16" y="30" fill="white" font-size="14" font-weight="bold">QZ</text>
+                    <path d="M28 15 C32 18, 35 25, 30 33" stroke="white" stroke-width="2" fill="none"/>
+                    
+                    <!-- CustomQZ Text -->
+                    <text x="55" y="30" fill="#3273dc" font-size="24" font-weight="bold">CustomQZ</text>
+                </g>
+            </svg>
+        </div>
+        
+        <div class="tabs">
+    <div class="tab {% if request.path == '/login/' %}active{% endif %}">
+        <a href="/login/" style="text-decoration: none; color: inherit;">Login</a>
+    </div>
+    <div class="tab {% if request.path == '/signup/' %}active{% endif %}">
+        <a href="/signup/" style="text-decoration: none; color: inherit;">Sign up</a>
+    </div>
+</div>
+
+<!-- LOGIN FORM -->
+<form id="login-form" class="form {% if request.path == '/login/' %}active{% endif %}" method="POST" action="/login/">
+    {% csrf_token %}
+    <input type="email" name="email" placeholder="Email" required>
+    <input type="password" name="password" placeholder="Password" required>
+    <button type="submit">Login</button>
+    <!-- Google button and divider here -->
+</form>
+
+<!-- SIGNUP FORM -->
+<form id="signup-form" class="form {% if request.path == '/signup/' %}active{% endif %}" method="POST" action="/signup/">
+    {% csrf_token %}
+    <input type="text" name="name" placeholder="Full Name" required>
+    <input type="email" name="email" placeholder="Email" required>
+    <input type="password" name="password" placeholder="Password" required>
+    <input type="password" name="confirm_password" placeholder="Confirm Password" required>
+    <button type="submit">Sign up</button>
+    <!-- Google button and divider here -->
+</form>
+
+        
+        <div class="footer">
+            By continuing, you agree to CustomQZ's <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>
+        </div>
+    </div>
+
+    <script>
+        function switchTab(tab) {
+            // Hide all forms
+            document.querySelectorAll('.form').forEach(form => {
+                form.classList.remove('active');
+            });
+            
+            // Show selected form
+            document.getElementById(tab + '-form').classList.add('active');
+            
+            // Update tab styling
+            
+            document.querySelectorAll('.tab').forEach(t => {
+                t.classList.remove('active');
+            });
+            event.currentTarget.classList.add('active');
+        }
+    </script>
+</body>
+</html>

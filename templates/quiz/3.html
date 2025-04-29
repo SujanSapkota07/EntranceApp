@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File Upload Interface</title>
+    <style>
+        /* CSS Reset and Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f5f5f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        /* Main Container Styles */
+        .upload-container {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 800px;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+
+        .upload-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .upload-header h1 {
+            color: #333;
+            font-weight: 500;
+            margin-bottom: 10px;
+        }
+
+        .upload-header p {
+            color: #666;
+        }
+
+        /* Options Container */
+        .upload-options {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            flex-wrap: wrap;
+        }
+
+        /* Upload Option Card */
+        .upload-option {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            padding: 30px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 220px;
+        }
+
+        .upload-option:hover {
+            border-color: #4285f4;
+            box-shadow: 0 4px 12px rgba(66, 133, 244, 0.1);
+        }
+
+        .upload-option .icon {
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .upload-option .csv-icon {
+            color: #4285f4;
+        }
+
+        .upload-option .manual-icon {
+            color: #4285f4;
+        }
+
+        .upload-option .text {
+            color: #4285f4;
+            font-weight: 500;
+            text-align: center;
+        }
+
+        /* File Input Styling */
+        .file-input {
+            display: none;
+        }
+
+        /* Form Submission Area */
+        .form-actions {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .submit-btn {
+            padding: 12px 24px;
+            background-color: #4285f4;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .submit-btn:hover {
+            background-color: #3367d6;
+        }
+
+        /* Status Messages */
+        .status-message {
+            text-align: center;
+            padding: 12px;
+            border-radius: 4px;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+    </style>
+</head>
+<body>
+    <!-- Main Form - This will be submitted to your Django backend -->
+    <!-- REPLACE URL: Update the action attribute with your Django URL pattern -->
+    <form id="uploadForm" action="{% url 'your_view_name' %}" method="post" enctype="multipart/form-data">
+        <!-- CSRF Token - Required for Django forms -->
+        {% csrf_token %}
+        
+        <div class="upload-container">
+            <!-- Header Section - Customize as needed -->
+            <div class="upload-header">
+                <h1>Import Data</h1>
+                <p>Select a method to add data to your system</p>
+            </div>
+            
+            <!-- Upload Options -->
+            <div class="upload-options">
+                <!-- CSV Upload Option -->
+                <label for="csvFile" class="upload-option" id="csvUploadOption">
+                    <div class="icon csv-icon">
+                        <!-- SVG for CSV Icon - You can replace with your own icon -->
+                        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                            <path d="M10 12v6"></path>
+                            <path d="M14 12v6"></path>
+                            <path d="M10 18h4"></path>
+                        </svg>
+                    </div>
+                    <div class="text">+ upload CSV File</div>
+                    
+                    <!-- This is the actual file input that will be hidden but functional -->
+                    <!-- CUSTOMIZE: You can change the name attribute to match your Django form field -->
+                    <input type="file" id="csvFile" name="csv_file" class="file-input" accept=".csv">
+                </label>
+                
+                <!-- Manual Creation Option -->
+                <!-- REPLACE URL: Update the onClick handler with your Django URL for manual creation -->
+                <div class="upload-option" id="manualOption" onclick="window.location.href='{% url 'your_manual_creation_view' %}'">
+                    <div class="icon manual-icon">
+                        <!-- SVG for Manual Creation Icon - You can replace with your own icon -->
+                        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="12" y1="8" x2="12" y2="16"></line>
+                            <line x1="8" y1="12" x2="16" y2="12"></line>
+                        </svg>
+                    </div>
+                    <div class="text">Create manually</div>
+                </div>
+            </div>
+            
+            <!-- Status Messages - These will be shown dynamically via JavaScript -->
+            <div id="successMessage" class="status-message success">
+                File uploaded successfully!
+            </div>
+            <div id="errorMessage" class="status-message error">
+                There was an error uploading your file.
+            </div>
+            
+            <!-- Form Actions - Only shown when a file is selected -->
+            <div class="form-actions" id="formActions" style="display: none;">
+                <button type="submit" class="submit-btn">Upload CSV</button>
+            </div>
+        </div>
+    </form>
+
+    <!-- JavaScript for handling file selection and form submission -->
+    <script>
+        // Get references to DOM elements
+        const csvFileInput = document.getElementById('csvFile');
+        const formActions = document.getElementById('formActions');
+        const csvUploadOption = document.getElementById('csvUploadOption');
+        const successMessage = document.getElementById('successMessage');
+        const errorMessage = document.getElementById('errorMessage');
+        const uploadForm = document.getElementById('uploadForm');
+
+        // Show the submit button when a file is selected
+        csvFileInput.addEventListener('change', function() {
+            if (this.files.length > 0) {
+                formActions.style.display = 'flex';
+                // Visual feedback that a file was selected
+                csvUploadOption.style.borderColor = '#4285f4';
+                csvUploadOption.style.boxShadow = '0 4px 12px rgba(66, 133, 244, 0.1)';
+            } else {
+                formActions.style.display = 'none';
+            }
+        });
+
+        // Handle form submission
+        uploadForm.addEventListener('submit', function(event) {
+            // OPTIONAL: Uncomment this to implement AJAX file upload
+            // event.preventDefault();
+            
+            // AJAX implementation would go here if you want to handle the upload without page refresh
+            // Example:
+            /*
+            event.preventDefault();
+            const formData = new FormData(this);
+            
+            fetch('{% url "your_view_name" %}', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    successMessage.style.display = 'block';
+                    errorMessage.style.display = 'none';
+                } else {
+                    errorMessage.textContent = data.error || 'There was an error uploading your file.';
+                    errorMessage.style.display = 'block';
+                    successMessage.style.display = 'none';
+                }
+            })
+            .catch(error => {
+                errorMessage.textContent = 'There was a network error. Please try again.';
+                errorMessage.style.display = 'block';
+                successMessage.style.display = 'none';
+            });
+            */
+        });
+    </script>
+</body>
+</html>

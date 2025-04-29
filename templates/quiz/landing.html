@@ -1,0 +1,303 @@
+{% load static%}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CustomQZ - Create Your Unique Quiz</title>
+    <style>
+        /* ===== GLOBAL STYLES ===== */
+        /* Reset default browser styling */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f7f7f7;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ===== HEADER STYLES ===== */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 50px;
+            background-color: white;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Logo container styling */
+        .logo-container {
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+        }
+
+        .logo {
+            height: 40px;
+            margin-right: 10px;
+        }
+
+        .logo-text {
+            font-size: 24px;
+            font-weight: bold;
+            color: #3478F6;
+            text-decoration: none;
+        }
+
+        /* Auth links styling */
+        .auth-links {
+            display: flex;
+            align-items: center;
+        }
+
+        .auth-link {
+            color: #666;
+            text-decoration: none;
+            margin-left: 15px;
+            font-size: 16px;
+        }
+
+        .icon-button {
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: #666;
+            cursor: pointer;
+            margin-left: 15px;
+        }
+
+        /* ===== MAIN CONTENT STYLES ===== */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+        }
+
+        .content-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Text content styling */
+        .text-content {
+            flex: 0 0 50%;
+            padding-right: 40px;
+        }
+
+        .main-heading {
+            font-size: 48px;
+            font-weight: bold;
+            color: #222;
+            margin-bottom: 10px;
+            line-height: 1.2;
+        }
+
+        /* Search form styling */
+        .search-container {
+            margin-top: 40px;
+            display: flex;
+            width: 100%;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 15px 20px;
+            font-size: 16px;
+            border: 1px solid #ddd;
+            border-radius: 8px 0 0 8px;
+            outline: none;
+        }
+
+        .search-button {
+            padding: 15px 30px;
+            font-size: 16px;
+            background-color: #3478F6;
+            color: white;
+            border: none;
+            border-radius: 0 8px 8px 0;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .create-new-button {
+            display: flex;
+            align-items: center;
+            background-color: white;
+            border: 1px solid #ddd;
+            padding: 15px 25px;
+            border-radius: 8px;
+            margin-left: 15px;
+            cursor: pointer;
+            text-decoration: none;
+            color: #3478F6;
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        .create-new-button span {
+            font-size: 24px;
+            margin-right: 8px;
+        }
+
+        /* Image content styling */
+        .image-content {
+            flex: 0 0 45%;
+            position: relative;
+        }
+
+        .main-image {
+            width: 100%;
+            height: auto;
+            max-width: 400px;
+            display: block;
+            margin: 0 auto;
+        }
+
+        /* ===== FOOTER STYLES ===== */
+        .footer {
+            background-color: white;
+            padding: 15px 50px;
+            text-align: right;
+            box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.05);
+        }
+
+        .site-url {
+            font-weight: bold;
+            color: #333;
+            font-size: 18px;
+            margin-bottom: 5px;
+        }
+
+        .page-info {
+            color: #666;
+            font-size: 14px;
+        }
+
+        /* ===== RESPONSIVE STYLES ===== */
+        @media (max-width: 768px) {
+            .content-container {
+                flex-direction: column-reverse;
+            }
+
+            .text-content {
+                flex: 1;
+                padding-right: 0;
+                text-align: center;
+                margin-top: 30px;
+            }
+
+            .image-content {
+                flex: 1;
+                margin-bottom: 30px;
+            }
+
+            .search-container {
+                flex-direction: column;
+            }
+
+            .search-input {
+                border-radius: 8px;
+                margin-bottom: 15px;
+            }
+
+            .search-button {
+                border-radius: 8px;
+                width: 100%;
+            }
+
+            .create-new-button {
+                margin-left: 0;
+                margin-top: 15px;
+                justify-content: center;
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header Section -->
+    <!-- This section contains the logo, navigation and authentication links -->
+    <header class="header">
+        <!-- Logo and Site Name - You can replace the logo-img src with your Django static files path -->
+        <a href="{% url 'home' %}" class="logo-container">
+            <!-- Django Template Tag for Static Files - Update with your actual logo path -->
+            <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgdmlld0JveD0iMCAwIDYwIDYwIj48Y2lyY2xlIGN4PSIzMCIgY3k9IjMwIiByPSIyOCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMzQ3OEY2IiBzdHJva2Utd2lkdGg9IjMiLz48cGF0aCBkPSJNMjAgMjBMNDAgNDBNMjAgNDBMNDAgMjAiIHN0cm9rZT0iIzM0NzhGNiIgc3Ryb2tlLXdpZHRoPSIzIiBzdHJva2UtbGluZWNhcD0icm91bmQiLz48dGV4dCB4PSIzMCIgeT0iMzAiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiMzNDc4RjYiIGZvbnQtZmFtaWx5PSJzYW5zLXNlcmlmIiBmb250LXNpemU9IjEwIiBmb250LXdlaWdodD0iYm9sZCI+UVo8L3RleHQ+PC9zdmc+" alt="CustomQZ Logo" class="logo">
+            <span class="logo-text">CustomQZ</span>
+        </a>
+
+        {% if user.is_authenticated %}
+        <div class="user-profile">
+            <!-- User Avatar - First letter of user's name -->
+            <!-- User Name - Django template variable -->
+            <a class="auth-link">{{user.username.upper}}</a>
+            <span class="auth-link">|</span>
+            <!-- logout -->
+            <a href="{% url 'logout' %}" class="auth-link">Logout</a>
+            <span class="auth-link">|</span>
+            <button class="icon-button">ⓘ</button>
+            <button class="icon-button">⚙️</button>
+        </div>
+        {% else %}
+
+        <!-- Authentication Links - Update href attributes with your Django URL names -->
+        <div class="auth-links">
+            <a href="{% url 'login' %}" class="auth-link">Login</a>
+            <span class="auth-link">|</span>
+            <a href="{% url 'signup' %}" class="auth-link">Sign up</a>
+            <button id = "info" class="icon-button">ⓘ</button>
+            <button class="icon-button">⚙️</button>
+        </div>
+        {% endif %}
+
+    </header>
+
+    <!-- Main Content Section -->
+    <main class="main-content">
+        <div class="content-container">
+            <!-- Left Side - Text Content -->
+            <div class="text-content">
+                <h1 class="main-heading">Welcome</h1>
+                <h1 class="main-heading">Create a Quiz</h1>
+                <h2 class="main-heading">That's Uniquely Yours</h2>
+
+                <!-- Quiz Search Form - Update form action with your Django view -->
+                <form action="{% url 'find_quiz' %}" method="GET" class="search-container">
+                    <input type="text" name="quiz_code" class="search-input" placeholder="Enter the Quiz code or link" required>
+                    <button type="submit" class="search-button">Find</button>
+                    
+                    <!-- Create New Quiz Button - Update with your Django URL name -->
+                    <a href="{% url 'create_quiz' %}" class="create-new-button">
+                        <span>+</span> Create New
+                    </a>
+                </form>
+            </div>
+
+            <!-- Right Side - Image Content -->
+            <div class="image-content">
+                <!-- Replace with your actual image path using Django static files -->
+                <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MDAiIGhlaWdodD0iNDAwIiB2aWV3Qm94PSIwIDAgNDAwIDQwMCI+PGNpcmNsZSBjeD0iMjAwIiBjeT0iMjAwIiByPSIxMDAiIGZpbGw9IiNGRkQ3MDAiIHN0cm9rZT0iI0ZGQjkwMCIgc3Ryb2tlLXdpZHRoPSIxMCIvPjxjaXJjbGUgY3g9IjIwMCIgY3k9IjIwMCIgcj0iNDAiIGZpbGw9IiNBNTJBMkEiLz48Y2lyY2xlIGN4PSIzMzAiIGN5PSIxMjAiIHI9IjQwIiBmaWxsPSIjRkZENzAwIiBzdHJva2U9IiNGRkI5MDAiIHN0cm9rZS13aWR0aD0iNCIvPjx0ZXh0IHg9IjMzMCIgeT0iMTIwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBhbGlnbm1lbnQtYmFzZWxpbmU9Im1pZGRsZSIgZmlsbD0iIzAwMCIgZm9udC1mYW1pbHk9InNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMzAiIGZvbnQtd2VpZ2h0PSJib2xkIj4/PC90ZXh0PjxjaXJjbGUgY3g9IjExMCIgY3k9IjE3MCIgcj0iNDAiIGZpbGw9IiNGRkQ3MDAiIHN0cm9rZT0iI0ZGQjkwMCIgc3Ryb2tlLXdpZHRoPSI0Ii8+PHRleHQgeD0iMTEwIiB5PSIxNzAiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGFsaWdubWVudC1iYXNlbGluZT0ibWlkZGxlIiBmaWxsPSIjMDAwIiBmb250LWZhbWlseT0ic2Fucy1zZXJpZiIgZm9udC1zaXplPSIzMCIgZm9udC13ZWlnaHQ9ImJvbGQiPj88L3RleHQ+PGNpcmNsZSBjeD0iMjUwIiBjeT0iMzQwIiByPSI0MCIgZmlsbD0iI0ZGRDcwMCIgc3Ryb2tlPSIjRkZCOTAwIiBzdHJva2Utd2lkdGg9IjQiLz48dGV4dCB4PSIyNTAiIHk9IjM0MCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgYWxpZ25tZW50LWJhc2VsaW5lPSJtaWRkbGUiIGZpbGw9IiMwMDAiIGZvbnQtZmFtaWx5PSJzYW5zLXNlcmlmIiBmb250LXNpemU9IjMwIiBmb250LXdlaWdodD0iYm9sZCI+PzwvdGV4dD48cmVjdCB4PSIxODAiIHk9IjE1MCIgd2lkdGg9IjQwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iI0E1MkEyQSIvPjxwYXRoIGQ9Ik0xNDAgMjgwQzE2MCAyNjAgMTgwIDI0MCAyMDAgMjQwQzIyMCAyNDAgMjQwIDI2MCAyNjAgMjgwIiBzdHJva2U9IiNBNTJBMkEiIHN0cm9rZS13aWR0aD0iMTAiIGZpbGw9Im5vbmUiLz48L3N2Zz4=" alt="Quiz Creation Concept" class="main-image">
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer Section -->
+    <!-- <footer class="footer">
+        <div class="site-url">customqz.com</div>
+        <div class="page-info">landing page</div>
+    </footer> -->
+</body>
+</html>
