@@ -1,3 +1,4 @@
+from django.shortcuts import render, get_object_or_404
 import json
 from django.http import HttpResponse
 from django.shortcuts import render
@@ -14,7 +15,7 @@ from .models import Quiz, Question, User, Option    # Our Quiz model
 from .serializers import QuizSerializer, QuestionSerializer             # Serializer for Quiz model
 from rest_framework.authtoken.models import Token
 from django.contrib.auth import authenticate
-
+from .utils import get_questions_by_quiz
 
 
 
@@ -99,7 +100,7 @@ def create_quiz(request):
 
 """ this is the dashboard of the quiz app."""
 from django.db.models import Count
-def dashboard(request):
+def mydashboard(request):
     if request.method == 'GET':
         user = request.user
         quizzes = Quiz.objects.filter(created_by=user).annotate(question_count=Count('questions'))
@@ -111,17 +112,17 @@ def dashboard(request):
 
     return render(request, 'quiz/dashboard.html', context)
 
+
+from .models import Category
 def edit_quiz(request, quiz_id):
-    # Fetch the quiz object
-    try:
-        quiz = Quiz.objects.get(id=quiz_id)
-    except Quiz.DoesNotExist:
-        return HttpResponse("Quiz not found", status=404)
-    # Check if the user is the creator of the quiz
-    if quiz.created_by != request.user:
-        return HttpResponse("You are not authorized to edit this quiz", status=403)
-    # Render the edit quiz page
-    return render(request, 'quiz/edit_quiz.html', {'quiz': quiz})
+    quiz= Quiz.objects.get(id=quiz_id)
+    questions = get_questions_by_quiz(quiz_id)
+    print(questions)
+    return render(request, 'quiz/edit_quiz.html', {
+        'quiz': quiz,
+        'questions': questions
+    })
+
 
 
 from .utils import import_quiz_from_file

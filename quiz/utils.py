@@ -1,6 +1,12 @@
 import re
 from .models import Quiz, Question, Option
 
+from .models import Question
+
+def get_questions_by_quiz(quiz_id):
+    return Question.objects.filter(quiz_id=quiz_id)
+
+
 
 def import_quiz_from_file(file_obj, created_by_user):
     print("Importing quiz from file...")

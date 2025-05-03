@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DivineKundali - Vedic Astrology Calculator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .house {
+            position: relative;
+            width: 100px;
+            height: 100px;
+            border: 2px solid #d97706;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: rgba(249, 168, 37, 0.1);
+        }
+        
+        .planet-icon {
+            position: absolute;
+            font-size: 1.5rem;
+        }
+        
+        .house-number {
+            position: absolute;
+            top: 5px;
+            left: 5px;
+            font-weight: bold;
+            color: #92400e;
+        }
+        
+        .kundali-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.7);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-content {
+            background-color: #1e293b;
+            padding: 2rem;
+            border-radius: 0.5rem;
+            max-width: 90%;
+            max-height: 90%;
+            overflow-y: auto;
+        }
+        
+        @keyframes rotatePlanet {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .rotating {
+            animation: rotatePlanet 10s linear infinite;
+        }
+        
+        .ascendant-house {
+            box-shadow: 0 0 15px #f59e0b;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-100 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <header class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-amber-500 mb-2">Divine<span class="text-white">Kundali</span></h1>
+            <p class="text-gray-400">Your personal Vedic astrology birth chart calculator</p>
+        </header>
+        
+        <div class="bg-gray-800 rounded-lg shadow-lg p-6 mb-8 max-w-3xl mx-auto">
+            <h2 class="text-2xl font-semibold text-amber-400 mb-4">Generate Your Kundali</h2>
+            
+            <form id="kundaliForm" class="space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label for="name" class="block text-gray-300 mb-1">Full Name</label>
+                        <input type="text" id="name" class="w-full bg-gray-700 border border-gray-600 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-amber-500" required>
+                    </div>
+                    
+                    <div>
+                        <label for="gender" class="block text-gray-300 mb-1">Gender</label>
+                        <select id="gender" class="w-full bg-gray-700 border border-gray-600 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-amber-500">
+                            <option value="male">Male</option>
+                            <option value="female">Female</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <label for="birthDate" class="block text-gray-300 mb-1">Birth Date</label>
+                        <input type="date" id="birthDate" class="w-full bg-gray-700 border border-gray-600 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-amber-500" required>
+                    </div>
+                    
+                    <div>
+                        <label for="birthTime" class="block text-gray-300 mb-1">Birth Time</label>
+                        <input type="time" id="birthTime" class="w-full bg-gray-700 border border-gray-600 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-amber-500" required>
+                    </div>
+                    
+                    <div>
+                        <label for="birthPlace" class="block text-gray-300 mb-1">Birth Place</label>
+                        <input type="text" id="birthPlace" class="w-full bg-gray-700 border border-gray-600 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-amber-500" required>
+                    </div>
+                </div>
+                
+                <div class="pt-4">
+                    <button type="submit" class="w-full bg-amber-600 hover:bg-amber-700 text-white font-bold py-3 px-4 rounded-md transition duration-300 flex items-center justify-center">
+                        <i class="fas fa-chart-line mr-2"></i> Generate Kundali
+                    </button>
+                </div>
+            </form>
+        </div>
+        
+        <div id="kundaliResult" class="hidden bg-gray-800 rounded-lg shadow-lg p-6 mb-8 max-w-5xl mx-auto">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-semibold text-amber-400">Your Kundali Report</h2>
+                <button id="printBtn" class="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-md">
+                    <i class="fas fa-print mr-2"></i>Print
+                </button>
+            </div>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="lg:col-span-2">
+                    <div class="bg-gray-700 rounded-lg p-4 mb-6">
+                        <h3 class="text-xl font-semibold text-amber-300 mb-3">Personal Details</h3>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <p class="text-gray-400">Name</p>
+                                <p id="resultName" class="font-medium">-</p>
+                            </div>
+                            <div>
+                                <p class="text-gray-400">Gender</p>
+                                <p id="resultGender" class="font-medium">-</p>
+                            </div>
+                            <div>
+                                <p class="text-gray-400">Date of Birth</p>
+                                <p id="resultDob" class="font-medium">-</p>
+                            </div>
+                            <div>
+                                <p class="text-gray-400">Time of Birth</p>
+                                <p id="resultTob" class="font-medium">-</p>
+                            </div>
+                            <div>
+                                <p class="text-gray-400">Place of Birth</p>
+                                <p id="resultPob" class="font-medium">-</p>
+                            </div>
+                            <div>
+                                <p class="text-gray-400">Sun Sign</p>
+                                <p id="resultSunSign" class="font-medium">-</p>
+                            </div>
+                            <div>
+                                <p class="text-gray-400">Moon Sign</p>
+                                <p id="resultMoonSign" class="font-medium">-</p>
+                            </div>
+                            <div>
+                                <p class="text-gray-400">Ascendant</p>
+                                <p id="resultAscendant" class="font-medium">-</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-gray-700 rounded-lg p-4 mb-6">
+                        <h3 class="text-xl font-semibold text-amber-300 mb-3">Planetary Positions</h3>
+                        <div id="planetPositions" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                            <!-- Planets will be added here dynamically -->
+                        </div>
+                    </div>
+                </div>
+                
+                <div>
+                    <div class="bg-gray-700 rounded-lg p-4 mb-6">
+                        <h3 class="text-xl font-semibold text-amber-300 mb-3">Birth Chart (Kundali)</h3>
+                        <div class="kundali-grid" id="kundaliChart">
+                            <!-- Houses will be added here dynamically -->
+                        </div>
+                    </div>
+                    
+                    <div class="bg-gray-700 rounded-lg p-4">
+                        <h3 class="text-xl font-semibold text-amber-300 mb-3">Key Insights</h3>
+                        <div id="keyInsights">
+                            <div class="mb-4">
+                                <h4 class="font-medium text-amber-200 mb-1">Personality Traits</h4>
+                                <p class="text-gray-300 text-sm" id="personalityTraits">-</p>
+                            </div>
+                            <div class="mb-4">
+                                <h4 class="font-medium text-amber-200 mb-1">Strengths</h4>
+                                <p class="text-gray-300 text-sm" id="strengths">-</p>
+                            </div>
+                            <div>
+                                <h4 class="font-medium text-amber-200 mb-1">Challenges</h4>
+                                <p class="text-gray-300 text-sm" id="challenges">-</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="bg-gray-800 rounded-lg shadow-lg p-6 mb-8 max-w-3xl mx-auto">
+            <h2 class="text-2xl font-semibold text-amber-400 mb-4">About Kundali</h2>
+            <div class="text-gray-300 space-y-4">
+                <p>A Kundali, also known as a birth chart or horoscope, is a celestial map that captures the exact positions of planets at the time of your birth. In Vedic astrology, this chart serves as the foundation for all astrological predictions and insights about your life.</p>
+                <p>The Kundali is divided into 12 houses, each representing different aspects of life such as career, relationships, health, and finances. The placement of planets in these houses, along with their relationships (aspects), forms the basis of astrological analysis.</p>
+                <button id="learnMoreBtn" class="mt-4 text-amber-400 hover:text-amber-300 font-medium flex items-center">
+                    Learn more about Kundali interpretation <i class="fas fa-chevron-right ml-2"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Learn More Modal -->
+    <div id="learnMoreModal" class="modal">
+        <div class="modal-content">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-semibold text-amber-400">Understanding Your Kundali</h3>
+                <button id="closeModal" class="text-gray-400 hover:text-white">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="text-gray-300 space-y-4">
+                <h4 class="font-medium text-amber-200">The 12 Houses</h4>
+                <p>Each house in your Kundali represents different life areas:</p>
+                <ul class="list-disc pl-5 space-y-2">
+                    <li><strong>1st House:</strong> Self, personality, appearance</li>
+                    <li><strong>2nd House:</strong> Wealth, family, speech</li>
+                    <li><strong>3rd House:</strong> Communication, siblings, courage</li>
+                    <li><strong>4th House:</strong> Home, mother, happiness</li>
+                    <li><strong>5th House:</strong> Creativity, children, intelligence</li>
+                    <li><strong>6th House:</strong> Health, enemies, service</li>
+                    <li><strong>7th House:</strong> Marriage, partnerships</li>
+                    <li><strong>8th House:</strong> Longevity, transformation, occult</li>
+                    <li><strong>9th House:</strong> Fortune, spirituality, father</li>
+                    <li><strong>10th House:</strong> Career, fame, authority</li>
+                    <li><strong>11th House:</strong> Gains, friends, aspirations</li>
+                    <li><strong>12th House:</strong> Expenses, liberation, foreign lands</li>
+                </ul>
+                
+                <h4 class="font-medium text-amber-200 mt-6">Planetary Influences</h4>
+                <p>Each planet governs specific aspects of life:</p>
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="flex items-center">
+                        <i class="fas fa-sun text-yellow-400 mr-2"></i>
+                        <span><strong>Sun:</strong> Soul, father, authority</span>
+                    </div>
+                    <div class="flex items-center">
+                        <i class="fas fa-moon text-blue-300 mr-2"></i>
+                        <span><strong>Moon:</strong> Mind, mother, emotions</span>
+                    </div>
+                    <div class="flex items-center">
+                        <i class="fas fa-fire text-red-500 mr-2"></i>
+                        <span><strong>Mars:</strong> Energy, courage, aggression</span>
+                    </div>
+                    <div class="flex items-center">
+                        <i class="fas fa-comment text-green-500 mr-2"></i>
+                        <span><strong>Mercury:</strong> Communication, intellect</span>
+                    </div>
+                    <div class="flex items-center">
+                        <i class="fas fa-heart text-pink-400 mr-2"></i>
+                        <span><strong>Venus:</strong> Love, beauty, luxury</span>
+                    </div>
+                    <div class="flex items-center">
+                        <i class="fas fa-globe text-yellow-600 mr-2"></i>
+                        <span><strong>Jupiter:</strong> Wisdom, expansion, fortune</span>
+                    </div>
+                    <div class="flex items-center">
+                        <i class="fas fa-satellite-dish text-gray-400 mr-2"></i>
+                        <span><strong>Saturn:</strong> Discipline, obstacles, karma</span>
+                    </div>
+                </div>
+                
+                <h4 class="font-medium text-amber-200 mt-6">How to Interpret</h4>
+                <p>To understand your Kundali, astrologers examine:</p>
+                <ul class="list-disc pl-5 space-y-2">
+                    <li>Which planets are placed in which houses</li>
+                    <li>Relationships between planets (aspects)</li>
+                    <li>Strength of each planet (exalted, debilitated, etc.)</li>
+                    <li>Current planetary transits affecting your chart</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <footer class="bg-gray-800 py-6 mt-12">
+        <div class="container mx-auto px-4 text-center text-gray-400">
+            <p>© 2023 DivineKundali - Vedic Astrology App</p>
+            <div class="flex justify-center space-x-4 mt-3">
+                <a href="#" class="hover:text-amber-400"><i class="fab fa-facebook"></i></a>
+                <a href="#" class="hover:text-amber-400"><i class="fab fa-twitter"></i></a>
+                <a href="#" class="hover:text-amber-400"><i class="fab fa-instagram"></i></a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Form submission
+            const kundaliForm = document.getElementById('kundaliForm');
+            const kundaliResult = document.getElementById('kundaliResult');
+            
+            // Modal elements
+            const learnMoreBtn = document.getElementById('learnMoreBtn');
+            const learnMoreModal = document.getElementById('learnMoreModal');
+            const closeModal = document.getElementById('closeModal');
+            
+            // Print button
+            const printBtn = document.getElementById('printBtn');
+            
+            // Form submission handler
+            kundaliForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                // Get form values
+                const name = document.getElementById('name').value;
+                const gender = document.getElementById('gender').value;
+                const birthDate = document.getElementById('birthDate').value;
+                const birthTime = document.getElementById('birthTime').value;
+                const birthPlace = document.getElementById('birthPlace').value;
+                
+                // Display basic info
+                document.getElementById('resultName').textContent = name;
+                document.getElementById('resultGender').textContent = gender.charAt(0).toUpperCase() + gender.slice(1);
+                document.getElementById('resultDob').textContent = formatDate(birthDate);
+                document.getElementById('resultTob').textContent = birthTime;
+                document.getElementById('resultPob').textContent = birthPlace;
+                
+                // Generate random but realistic astrological data
+                const zodiacSigns = ['Aries', 'Taurus', 'Gemini', 'Cancer', 'Leo', 'Virgo', 'Libra', 'Scorpio', 'Sagittarius', 'Capricorn', 'Aquarius', 'Pisces'];
+                const randomSign = zodiacSigns[Math.floor(Math.random() * zodiacSigns.length)];
+                const randomMoonSign = zodiacSigns[Math.floor(Math.random() * zodiacSigns.length)];
+                const randomAscendant = zodiacSigns[Math.floor(Math.random() * zodiacSigns.length)];
+                
+                document.getElementById('resultSunSign').textContent = randomSign;
+                document.getElementById('resultMoonSign').textContent = randomMoonSign;
+                document.getElementById('resultAscendant').textContent = randomAscendant;
+                
+                // Generate planetary positions
+                generatePlanetaryPositions();
+                
+                // Generate Kundali chart
+                generateKundaliChart(randomAscendant);
+                
+                // Generate personality insights based on signs
+                generatePersonalityInsights(randomSign, randomMoonSign, randomAscendant);
+                
+                // Show the result section
+                kundaliResult.classList.remove('hidden');
+                
+                // Scroll to results
+                kundaliResult.scrollIntoView({ behavior: 'smooth' });
+            });
+            
+            // Format date for display
+            function formatDate(dateString) {
+                const options = { year: 'numeric', month: 'long', day: 'numeric' };
+                return new Date(dateString).toLocaleDateString('en-US', options);
+            }
+            
+            // Generate planetary positions
+            function generatePlanetaryPositions() {
+                const planets = [
+                    { name: 'Sun', icon: 'sun', color: 'text-yellow-400' },
+                    { name: 'Moon', icon: 'moon', color: 'text-blue-300' },
+                    { name: 'Mars', icon: 'fire', color: 'text-red-500' },
+                    { name: 'Mercury', icon: 'comment', color: 'text-green-500' },
+                    { name: 'Jupiter', icon: 'globe', color: 'text-yellow-600' },
+                    { name: 'Venus', icon: 'heart', color: 'text-pink-400' },
+                    { name: 'Saturn', icon: 'satellite-dish', color: 'text-gray-400' },
+                    { name: 'Rahu', icon: 'dragon', color: 'text-purple-500' },
+                    { name: 'Ketu', icon: 'meteor', color: 'text-orange-300' }
+                ];
+                
+                const zodiacSigns = ['Aries', 'Taurus', 'Gemini', 'Cancer', 'Leo', 'Virgo', 'Libra', 'Scorpio', 'Sagittarius', 'Capricorn', 'Aquarius', 'Pisces'];
+                const houses = ['1st', '2nd', '3rd', '4th', '5th', '6th', '7th', '8th', '9th', '10th', '11th', '12th'];
+                
+                const planetPositionsContainer = document.getElementById('planetPositions');
+                planetPositionsContainer.innerHTML = '';
+                
+                planets.forEach(planet => {
+                    const randomSign = zodiacSigns[Math.floor(Math.random() * zodiacSigns.length)];
+                    const randomHouse = houses[Math.floor(Math.random() * houses.length)];
+                    const randomDegree = Math.floor(Math.random() * 30);
+                    
+                    const planetElement = document.createElement('div');
+                    planetElement.className = 'bg-gray-800 rounded-md p-3 flex items-center';
+                    planetElement.innerHTML = `
+                        <div class="mr-3 ${planet.color}">
+                            <i class="fas fa-${planet.icon} text-xl ${planet.name === 'Sun' ? 'rotating' : ''}"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-medium">${planet.name}</h4>
+                            <p class="text-sm text-gray-400">${randomSign} (${randomDegree}°), ${randomHouse} House</p>
+                        </div>
+                    `;
+                    
+                    planetPositionsContainer.appendChild(planetElement);
+                });
+            }
+            
+            // Generate Kundali chart
+            function generateKundaliChart(ascendant) {
+                const kundaliChart = document.getElementById('kundaliChart');
+                kundaliChart.innerHTML = '';
+                
+                const zodiacSigns = ['Aries', 'Taurus', 'Gemini', 'Cancer', 'Leo', 'Virgo', 'Libra', 'Scorpio', 'Sagittarius', 'Capricorn', 'Aquarius', 'Pisces'];
+                const ascendantIndex = zodiacSigns.indexOf(ascendant);
+                
+                // Create 12 houses
+                for (let i = 0; i < 12; i++) {
+                    const house = document.createElement('div');
+                    house.className = 'house';
+                    
+                    // Calculate the sign for this house based on ascendant
+                    const signIndex = (ascendantIndex + i) % 12;
+                    const sign = zodiacSigns[signIndex];
+                    
+                    // Mark the ascendant house
+                    if (i === 0) {
+                        house.classList.add('ascendant-house');
+                    }
+                    
+                    // Add house number
+                    const houseNumber = document.createElement('span');
+                    houseNumber.className = 'house-number';
+                    houseNumber.textContent = i + 1;
+                    house.appendChild(houseNumber);
+                    
+                    // Add sign name
+                    const signElement = document.createElement('span');
+                    signElement.className = 'text-xs font-medium text-center';
+                    signElement.textContent = sign;
+                    house.appendChild(signElement);
+                    
+                    // Randomly add some planets to houses
+                    if (Math.random() > 0.7) {
+                        const planets = ['sun', 'moon', 'mercury', 'venus', 'mars', 'jupiter', 'saturn'];
+                        const randomPlanet = planets[Math.floor(Math.random() * planets.length)];
+                        
+                        const planetIcon = document.createElement('i');
+                        planetIcon.className = `planet-icon fas fa-${randomPlanet} ${randomPlanet === 'sun' ? 'text-yellow-400 rotating' : 
+                                              randomPlanet === 'moon' ? 'text-blue-300' :
+                                              randomPlanet === 'mercury' ? 'text-green-500' :
+                                              randomPlanet === 'venus' ? 'text-pink-400' :
+                                              randomPlanet === 'mars' ? 'text-red-500' :
+                                              randomPlanet === 'jupiter' ? 'text-yellow-600' : 'text-gray-400'}`;
+                        
+                        // Position randomly within the house
+                        planetIcon.style.top = `${10 + Math.random() * 60}px`;
+                        planetIcon.style.left = `${10 + Math.random() * 60}px`;
+                        
+                        house.appendChild(planetIcon);
+                    }
+                    
+                    kundaliChart.appendChild(house);
+                }
+            }
+            
+            // Generate personality insights
+            function generatePersonalityInsights(sunSign, moonSign, ascendant) {
+                const traits = {
+                    Aries: { traits: "Energetic, courageous, determined", strengths: "Leadership, initiative, enthusiasm", challenges: "Impatience, impulsiveness, aggression" },
+                    Taurus: { traits: "Reliable, patient, practical", strengths: "Determination, loyalty, sensibility", challenges: "Stubbornness, possessiveness, resistance to change" },
+                    Gemini: { traits: "Adaptable, outgoing, intelligent", strengths: "Communication, versatility, curiosity", challenges: "Nervousness, inconsistency, superficiality" },
+                    Cancer: { traits: "Intuitive, emotional, protective", strengths: "Loyalty, empathy, imagination", challenges: "Moodiness, pessimism, over-sensitivity" },
+                    Leo: { traits: "Generous, warm-hearted, creative", strengths: "Confidence, ambition, leadership", challenges: "Arrogance, stubbornness, intolerance" },
+                    Virgo: { traits: "Modest, analytical, practical", strengths: "Attention to detail, reliability, intelligence", challenges: "Worry, critical nature, perfectionism" },
+                    Libra: { traits: "Diplomatic, fair-minded, social", strengths: "Cooperation, charm, fairness", challenges: "Indecisiveness, avoidance of confrontations" },
+                    Scorpio: { traits: "Determined, passionate, intuitive", strengths: "Resourcefulness, courage, loyalty", challenges: "Jealousy, secretiveness, resentment" },
+                    Sagittarius: { traits: "Adventurous, optimistic, philosophical", strengths: "Generosity, idealism, humor", challenges: "Impatience, tactlessness, restlessness" },
+                    Capricorn: { traits: "Disciplined, responsible, patient", strengths: "Self-control, practicality, leadership", challenges: "Pessimism, rigidity, coldness" },
+                    Aquarius: { traits: "Progressive, original, humanitarian", strengths: "Inventiveness, friendliness, independence", challenges: "Detachment, unpredictability" },
+                    Pisces: { traits: "Compassionate, artistic, intuitive", strengths: "Empathy, creativity, adaptability", challenges: "Escapism, oversensitivity, victim mentality" }
+                };
+                
+                // Combine traits from sun, moon and ascendant
+                const sunTraits = traits[sunSign] || traits.Aries;
+                const moonTraits = traits[moonSign] || traits.Aries;
+                const ascendantTraits = traits[ascendant] || traits.Aries;
+                
+                document.getElementById('personalityTraits').textContent = 
+                    `With your Sun in ${sunSign}, you're naturally ${sunTraits.traits}. 
+                    Your Moon in ${moonSign} adds ${moonTraits.traits.toLowerCase()}, 
+                    while your ${ascendant} Ascendant gives you ${ascendantTraits.traits.toLowerCase()}.`;
+                
+                document.getElementById('strengths').textContent = 
+                    `Your greatest strengths include ${sunTraits.strengths.toLowerCase()}, 
+                    ${moonTraits.strengths.toLowerCase()}, and ${ascendantTraits.strengths.toLowerCase()}.`;
+                
+                document.getElementById('challenges').textContent = 
+                    `Areas to work on include ${sunTraits.challenges.toLowerCase()}, 
+                    ${moonTraits.challenges.toLowerCase()}, and ${ascendantTraits.challenges.toLowerCase()}.`;
+            }
+            
+            // Modal handlers
+            learnMoreBtn.addEventListener('click', function() {
+                learnMoreModal.style.display = 'flex';
+            });
+            
+            closeModal.addEventListener('click', function() {
+                learnMoreModal.style.display = 'none';
+            });
+            
+            // Close modal when clicking outside
+            window.addEventListener('click', function(e) {
+                if (e.target === learnMoreModal) {
+                    learnMoreModal.style.display = 'none';
+                }
+            });
+            
+            // Print handler
+            printBtn.addEventListener('click', function() {
+                window.print();
+            });
+        });
+    </script>
+</body>
+</html>

@@ -8,6 +8,13 @@ from django.core.exceptions import ValidationError
 
 
 
+class Category(models.Model):
+    name = models.CharField(max_length=100, blank=True, null=True)
+
+    def __str__(self):
+        return self.name
+    
+
 #  a class for user
 class User(AbstractUser):
     # everthing is default in the user model
@@ -16,15 +23,18 @@ class User(AbstractUser):
         return self.username    
     
 
-
 class Quiz(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    category = models.ForeignKey(Category, on_delete=models.CASCADE, blank=True, null=True)
     title = models.CharField(max_length=255)
     description = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    image = models.ImageField(upload_to='quiz/', blank=True, null=True)  
     created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='quizzes')
     updated_at = models.DateTimeField(auto_now=True)
     is_active = models.BooleanField(default=True)
+    # add time limit to play quiz
+    time_limit = models.IntegerField(default=0)  # in minutes
     # a quiz will have many questions
 
     def __str__(self):
@@ -39,7 +49,8 @@ class Question(models.Model):
     # a question will be related to a quiz
     quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE, related_name='questions')
     question_text = models.TextField()
-    # image = models.ImageField(upload_to='questions/', blank=True, null=True)
+    image = models.ImageField(upload_to='questions/', blank=True, null=True)
+    # a
     # question will have many choices
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -54,7 +65,7 @@ class Option(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     question = models.ForeignKey(Question, on_delete=models.CASCADE, related_name='options')
     option_text = models.TextField()
-    # image = models.ImageField(upload_to='options/', blank=True, null=True)
+    image = models.ImageField(upload_to='options/', blank=True, null=True)
     is_correct = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
