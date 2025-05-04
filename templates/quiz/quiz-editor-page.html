@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Editor</title>
+    <style>
+        :root {
+            --primary: #4a6bff;
+            --primary-dark: #3955cc;
+            --secondary: #f8f9fa;
+            --danger: #dc3545;
+            --success: #28a745;
+            --dark: #343a40;
+            --light: #f8f9fa;
+            --border: #dee2e6;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fb;
+            color: #333;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            padding: 25px;
+        }
+        
+        .quiz-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .quiz-title {
+            font-size: 1.8rem;
+            color: var(--dark);
+            font-weight: 600;
+            width: 70%;
+            padding: 8px;
+            border: 1px solid transparent;
+            border-radius: 5px;
+            transition: all 0.2s;
+        }
+        
+        .quiz-title:focus {
+            outline: none;
+            border-color: var(--primary);
+            background-color: rgba(74, 107, 255, 0.05);
+        }
+        
+        .save-btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        
+        .save-btn:hover {
+            background-color: var(--primary-dark);
+        }
+        
+        .questions-container {
+            margin-top: 20px;
+        }
+        
+        .question-card {
+            background-color: white;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            margin-bottom: 25px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s;
+        }
+        
+        .question-card:hover {
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        }
+        
+        .question-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: var(--secondary);
+            padding: 15px 20px;
+            border-top-left-radius: 8px;
+            border-top-right-radius: 8px;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .question-number {
+            font-weight: 600;
+            color: var(--primary);
+        }
+        
+        .question-header-btns {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .question-content {
+            padding: 20px;
+        }
+        
+        .question-text-container {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .question-text {
+            flex-grow: 1;
+            padding: 12px;
+            border: 1px solid var(--border);
+            border-radius: 5px;
+            resize: vertical;
+            min-height: 60px;
+            transition: all 0.2s;
+        }
+        
+        .question-text:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+        
+        .options-list {
+            list-style: none;
+        }
+        
+        .option-item {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            margin-bottom: 12px;
+            padding: 10px;
+            border-radius: 5px;
+            transition: all 0.2s;
+        }
+        
+        .option-item:hover {
+            background-color: rgba(0, 0, 0, 0.02);
+        }
+        
+        .option-correct {
+            margin: 0;
+            width: 18px;
+            height: 18px;
+        }
+        
+        .option-text {
+            flex-grow: 1;
+            padding: 10px;
+            border: 1px solid var(--border);
+            border-radius: 5px;
+            transition: all 0.2s;
+        }
+        
+        .option-text:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+        
+        .btn {
+            background-color: transparent;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            padding: 6px;
+            transition: all 0.2s;
+        }
+        
+        .btn:hover {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+        
+        .btn-danger {
+            color: var(--danger);
+        }
+        
+        .btn-danger:hover {
+            background-color: rgba(220, 53, 69, 0.1);
+        }
+        
+        .btn-add {
+            color: var(--success);
+        }
+        
+        .btn-add:hover {
+            background-color: rgba(40, 167, 69, 0.1);
+        }
+        
+        .btn-upload {
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            padding: 5px 10px;
+            border: 1px solid var(--primary);
+            border-radius: 5px;
+            background-color: white;
+        }
+        
+        .btn-upload:hover {
+            background-color: rgba(74, 107, 255, 0.05);
+        }
+        
+        .image-preview {
+            max-width: 200px;
+            max-height: 150px;
+            border-radius: 5px;
+            border: 1px solid var(--border);
+            margin-top: 10px;
+            object-fit: cover;
+        }
+        
+        .file-input {
+            display: none;
+        }
+        
+        .add-question-btn {
+            width: 100%;
+            padding: 12px;
+            margin-top: 15px;
+            background-color: var(--light);
+            border: 2px dashed var(--border);
+            border-radius: 8px;
+            color: var(--dark);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .add-question-btn:hover {
+            background-color: var(--secondary);
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+        
+        .option-actions {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .photo-container {
+            position: relative;
+            margin-top: 10px;
+        }
+        
+        .remove-photo {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background-color: rgba(255, 255, 255, 0.8);
+            border-radius: 50%;
+            width: 25px;
+            height: 25px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: var(--danger);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+        }
+        
+        .remove-photo:hover {
+            background-color: white;
+            color: #b30000;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="quiz-header">
+            <input type="text" class="quiz-title" value="Your Quiz Title" placeholder="Enter Quiz Title">
+            <button class="save-btn">Save Quiz</button>
+        </div>
+
+        <div class="questions-container" id="questionsContainer">
+            <!-- Question 1 -->
+            <div class="question-card">
+                <div class="question-header">
+                    <div class="question-number">Question 1</div>
+                    <div class="question-header-btns">
+                        <button class="btn btn-danger delete-question" title="Delete Question">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M3 6h18"></path>
+                                <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
+                                <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                <div class="question-content">
+                    <div class="question-text-container">
+                        <textarea class="question-text" placeholder="Enter your question here...">What is the capital of France?</textarea>
+                        <div>
+                            <input type="file" class="file-input" id="questionImg1" accept="image/*">
+                            <label for="questionImg1" class="btn-upload">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                    <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                                    <polyline points="21 15 16 10 5 21"></polyline>
+                                </svg>
+                                Add Image
+                            </label>
+                            <!-- Image preview will appear here when uploaded -->
+                        </div>
+                    </div>
+
+                    <ul class="options-list">
+                        <!-- Option 1 -->
+                        <li class="option-item">
+                            <input type="radio" name="correct1" class="option-correct" checked>
+                            <input type="text" class="option-text" value="Paris" placeholder="Option text">
+                            <div class="option-actions">
+                                <input type="file" class="file-input" id="option1Img1" accept="image/*">
+                                <label for="option1Img1" class="btn btn-upload" title="Add Image">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                        <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                                        <polyline points="21 15 16 10 5 21"></polyline>
+                                    </svg>
+                                </label>
+                                <button class="btn btn-danger" title="Delete Option">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                                    </svg>
+                                </button>
+                            </div>
+                            <!-- Image preview will be added here -->
+                        </li>
+
+                        <!-- Option 2 -->
+                        <li class="option-item">
+                            <input type="radio" name="correct1" class="option-correct">
+                            <input type="text" class="option-text" value="London" placeholder="Option text">
+                            <div class="option-actions">
+                                <input type="file" class="file-input" id="option2Img1" accept="image/*">
+                                <label for="option2Img1" class="btn btn-upload" title="Add Image">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                        <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                                        <polyline points="21 15 16 10 5 21"></polyline>
+                                    </svg>
+                                </label>
+                                <button class="btn btn-danger" title="Delete Option">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                                    </svg>
+                                </button>
+                            </div>
+                        </li>
+
+                        <!-- Option 3 -->
+                        <li class="option-item">
+                            <input type="radio" name="correct1" class="option-correct">
+                            <input type="text" class="option-text" value="Berlin" placeholder="Option text">
+                            <div class="option-actions">
+                                <input type="file" class="file-input" id="option3Img1" accept="image/*">
+                                <label for="option3Img1" class="btn btn-upload" title="Add Image">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                        <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                                        <polyline points="21 15 16 10 5 21"></polyline>
+                                    </svg>
+                                </label>
+                                <button class="btn btn-danger" title="Delete Option">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                                    </svg>
+                                </button>
+                            </div>
+                        </li>
+
+                        <!-- Option 4 -->
+                        <li class="option-item">
+                            <input type="radio" name="correct1" class="option-correct">
+                            <input type="text" class="option-text" value="Rome" placeholder="Option text">
+                            <div class="option-actions">
+                                <input type="file" class="file-input" id="option4Img1" accept="image/*">
+                                <label for="option4Img1" class="btn btn-upload" title="Add Image">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                        <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                                        <polyline points="21 15 16 10 5 21"></polyline>
+                                    </svg>
+                                </label>
+                                <button class="btn btn-danger" title="Delete Option">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                                    </svg>
+                                </button>
+                            </div>
+                        </li>
+                    </ul>
+
+                    <!-- Add Option Button -->
+                    <button class="btn btn-add add-option">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="12" y1="8" x2="12" y2="16"></line>
+                            <line x1="8" y1="12" x2="16" y2="12"></line>
+                        </svg>
+                        Add Option
+                    </button>
+                </div>
+            </div>
+
+            <!-- Question 2 -->
+            <div class="question-card">
+                <div class="question-header">
+                    <div class="question-number">Question 2</div>
+                    <div class="question-header-btns">
+                        <button class="btn btn-danger delete-question" title="Delete Question">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M3 6h18"></path>
+                                <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
+                                <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                <div class="question-content">
+                    <div class="question-text-container">
+                        <textarea class="question-text" placeholder="Enter your question here...">Which planet is known as the Red Planet?</textarea>
+                        <div>
+                            <input type="file" class="file-input" id="questionImg2" accept="image/*">
+                            <label for="questionImg2" class="btn-upload">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                    <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                                    <polyline points="21 15 16 10 5 21"></polyline>
+                                </svg>
+                                Add Image
+                            </label>
+                        </div>
+                    </div>
+
+                    <ul class="options-list">
+                        <!-- Option 1 -->
+                        <li class="option-item">
+                            <input type="radio" name="correct2" class="option-correct">
+                            <input type="text" class="option-text" value="Venus" placeholder="Option text">
+                            <div class="option-actions">
+                                <input type="file" class="file-input" id="option1Img2" accept="image/*">
+                                <label for="option1Img2" class="btn btn-upload" title="Add Image">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                        <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                                        <polyline points="21 15 16 10 5 21"></polyline>
+                                    </svg>
+                                </label>
+                                <button class="btn btn-danger" title="Delete Option">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                                    </svg>
+                                </button>
+                            </div>
+                        </li>
+
+                        <!-- Option 2 -->
+                        <li class="option-item">
+                            <input type="radio" name="correct2" class="option-correct" checked>
+                            <input type="text" class="option-text" value="Mars" placeholder="Option text">
+                            <div class="option-actions">
+                                <input type="file" class="file-input" id="option2Img2" accept="image/*">
+                                <label for="option2Img2" class="btn btn-upload" title="Add Image">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                        <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                                        <polyline points="21 15 16 10 5 21"></polyline>
+                                    </svg>
+                                </label>
+                                <button class="btn btn-danger" title="Delete Option">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                                    </svg>
+                                </button>
+                            </div>
+                        </li>
+
+                        <!-- Option 3 -->
+                        <li class="option-item">
+                            <input type="radio" name="correct2" class="option-correct">
+                            <input type="text" class="option-text" value="Jupiter" placeholder="Option text">
+                            <div class="option-actions">
+                                <input type="file" class="file-input" id="option3Img2" accept="image/*">
+                                <label for="option3Img2" class="btn btn-upload" title="Add Image">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                        <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                                        <polyline points="21 15 16 10 5 21"></polyline>
+                                    </svg>
+                                </label>
+                                <button class="btn btn-danger" title="Delete Option">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                                    </svg>
+                                </button>
+                            </div>
+                        </li>
+
+                        <!-- Option 4 -->
+                        <li class="option-item">
+                            <input type="radio" name="correct2" class="option-correct">
+                            <input type="text" class="option-text" value="Mercury" placeholder="Option text">
+                            <div class="option-actions">
+                                <input type="file" class="file-input" id="option4Img2" accept="image/*">
+                                <label for="option4Img2" class="btn btn-upload" title="Add Image">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                        <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                                        <polyline points="21 15 16 10 5 21"></polyline>
+                                    </svg>
+                                </label>
+                                <button class="btn btn-danger" title="Delete Option">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                                    </svg>
+                                </button>
+                            </div>
+                        </li>
+                    </ul>
+
+                    <!-- Add Option Button -->
+                    <button class="btn btn-add add-option">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="12" y1="8" x2="12" y2="16"></line>
+                            <line x1="8" y1="12" x2="16" y2="12"></line>
+                        </svg>
+                        Add Option
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add Question Button -->
+        <button class="add-question-btn" id="addQuestionBtn">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="16"></line>
+                <line x1="8" y1="12" x2="16" y2="12"></line>
+            </svg>
+            Add New Question
+        </button>
+    </div>
+</body>

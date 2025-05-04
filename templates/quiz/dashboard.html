@@ -137,7 +137,7 @@
             <input type="text" class="search-bar" placeholder="Search quizzes...">
             <div class="quiz-grid">
                 {% for quiz in quizzes %}
-                <a href="{% url 'edit_quiz' quiz.id %}" style="text-decoration: none; color: inherit;">
+                <a href="{% url 'view_quiz' quiz.id %}" style="text-decoration: none; color: inherit;">
    
                 <div class="quiz-card">
                     <div class="card-header">

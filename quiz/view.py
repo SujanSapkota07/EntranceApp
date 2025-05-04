@@ -114,13 +114,14 @@ def mydashboard(request):
 
 
 from .models import Category
-def edit_quiz(request, quiz_id):
+def view_quiz(request, quiz_id):
     quiz= Quiz.objects.get(id=quiz_id)
     questions = get_questions_by_quiz(quiz_id)
-    print(questions)
-    return render(request, 'quiz/edit_quiz.html', {
+    count = questions.count()
+    return render(request, 'quiz/quiz-viewer-page.html', {
         'quiz': quiz,
-        'questions': questions
+        'questions': questions,
+        'count': count
     })
 
 
