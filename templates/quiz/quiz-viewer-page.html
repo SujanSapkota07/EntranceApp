@@ -185,6 +185,7 @@
             max-height: 150px;
             margin-top: 10px;
         }
+
         
         .back-btn {
             background-color: var(--secondary);
@@ -233,8 +234,28 @@
             display: flex;
             gap: 10px;
         }
+         .lightbox {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.8); /* Darkened background */
+        display: none; /* Hidden by default */
+        justify-content: center;
+        align-items: center;
+        z-index: 1000; /* Ensure it's on top */
+        cursor: pointer; /* Indicate it's clickable to close */
+    }
+
+    .lightbox-image {
+        max-width: 90%;
+        max-height: 90%;
+        object-fit: contain;
+    }
     </style>
 </head>
+
 <body>
     <div class="container">
         <div class="quiz-header">
@@ -260,7 +281,7 @@
                 </a>
             </div>
         </div>
-        
+
         <div class="quiz-info">
             <div class="quiz-info-item">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -289,32 +310,29 @@
                 {{quiz.created_by}}
             </div>
         </div>
-        
+
 
         <div class="questions-container" id="questionsContainer">
 
         {% for question in questions %}
-            <!-- Question 1 -->
             <div class="question-card">
                 <div class="question-header">
                     <div class="question-number">Question {{ forloop.counter }}</div>
                 </div>
                 <div class="question-content">
                     <div class="question-text-container">
-                        <div class="question-text">{{ question}}</div>
+                        <div class="question-text">{{ question.question_text }}</div>
                     </div>
-                    
-                    <!-- Image for Question (if exists) -->
+
                     <div class="image-container">
                         {% if question.image %}
-        <img src="{{ question.image.url }}" alt="Question Image" class="question-image mb-4 rounded-lg">
-    {% endif %}
+                            <img src="{{ question.image.url }}" alt="Question Image" class="question-image-preview mb-4 rounded-lg" style="max-width: 200px; max-height: 150px; object-fit: contain;">
+                        {% endif %}
                     </div>
-                    
+
                     <ul class="options-list space-y-2">
     {% for option in question.options.all %}
         <li class="option-item flex items-start gap-4 p-3 border rounded-lg {% if option.is_correct %}bg-green-100{% else %}bg-white{% endif %}">
-            <!-- Radio button with correct option pre-selected -->
             <input type="radio"
                    name="question_{{ forloop.parentloop.counter }}"
                    {% if option.is_correct %}checked{% endif %}
@@ -326,7 +344,7 @@
 
                 {% if option.image %}
                     <img src="{{ option.image.url }}" alt="Option Image"
-                         class="mt-2 max-w-xs rounded-md border shadow">
+                         class="option-image-preview mt-2 max-w-xs rounded-md border shadow" style="max-width: 150px; max-height: 100px; object-fit: contain;">
                 {% endif %}
             </div>
         </li>
@@ -340,5 +358,62 @@
 
         </div>
     </div>
+
+    <style>
+
+
+        .question-image-preview {
+            max-width: 200px; /* Adjust as needed */
+            max-height: 150px;  /* Adjust as needed */
+            object-fit: contain;
+            cursor: pointer; /* Indicate it's clickable */
+        }
+
+        .option-image-preview {
+            max-width: 150px;  /* Adjust as needed */
+            max-height: 100px;  /* Adjust as needed */
+            object-fit: contain;
+            cursor: pointer; /* Indicate it's clickable */
+        }
+    </style>
+
+    <script>
+
+document.addEventListener('DOMContentLoaded', function() {
+        console.log("Lightbox script loaded"); // Check if script runs
+
+        const images = document.querySelectorAll('.question-image-preview, .option-image-preview');
+        console.log("Found images:", images); // Check if images are selected
+
+        images.forEach(img => {
+            img.addEventListener('click', function() {
+                const lightbox = document.createElement('div');
+                lightbox.classList.add('lightbox');
+
+                const lightboxImage = document.createElement('img');
+                lightboxImage.classList.add('lightbox-image');
+                lightboxImage.src = this.src;
+                lightboxImage.alt = this.alt;
+
+                lightbox.appendChild(lightboxImage);
+                document.body.appendChild(lightbox);
+
+                // Make the lightbox visible
+                lightbox.style.display = 'flex'; // Or 'block' depending on your CSS
+
+                // Closing logic
+                lightbox.addEventListener('click', function(event) {
+                    if (event.target === this) {
+                        this.remove();
+                    }
+                });
+            });
+        });
+    });
+</script>
+
+</script>
+    </script>
 </body>
+
 </html>
