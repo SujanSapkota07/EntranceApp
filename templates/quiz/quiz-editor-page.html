@@ -296,7 +296,6 @@
         }
     </style>
 </head>
-
 <body>
     <div class="container">
         <div class="quiz-header">
@@ -329,10 +328,10 @@
                 <input type="number" class="w-full px-4 py-2 border border-gray-300 rounded-lg" id="quiz-time" data-quiz-field="time_limit" value="{{ quiz.time_limit }}" placeholder="Time Limit (minutes)">
             </div>
 
-{#            <div>#}
-{#                <label class="block text-gray-700 font-medium mb-1" for="quiz-pass">Passing Score (%)</label>#}
-{#                <input type="number" class="w-full px-4 py-2 border border-gray-300 rounded-lg" id="quiz-pass" data-quiz-field="passing_score" value="{{ quiz.passing_score|default:70 }}" placeholder="Passing Score (%)">#}
-{#            </div>#}
+            {#            <div>#}
+            {#                <label class="block text-gray-700 font-medium mb-1" for="quiz-pass">Passing Score (%)</label>#}
+            {#                <input type="number" class="w-full px-4 py-2 border border-gray-300 rounded-lg" id="quiz-pass" data-quiz-field="passing_score" value="{{ quiz.passing_score|default:70 }}" placeholder="Passing Score (%)">#}
+            {#            </div>#}
         </div>
 
         <div class="questions-container" id="questionsContainer">
@@ -455,64 +454,36 @@ function getBase64(file, callback) {
     reader.readAsDataURL(file);
 }
 
-function gatherQuestions() {
-    const questionElements = document.querySelectorAll('.question-block');
-    const questions = [];
-
-    questionElements.forEach((qEl, index) => {
-        const questionText = qEl.querySelector('.question-text').value;
-        const optionInputs = qEl.querySelectorAll('.option-input');
-        const correctOption = qEl.querySelector('input[type="radio"]:checked');
-
-        const options = [];
-
-
-        optionInputs.forEach((optInput, idx) => {
-            options.push({
-                text: optInput.value,
-                is_correct: correctOption && correctOption.value == idx.toString()
-            });
-        });
-
-        questions.push({
-            text: questionText,
-            options: options
-        });
-    });
-
-    return questions;
-}
-
-
-
 function collectFormDataAndSubmit(quizId) {
     const title = document.getElementById("quiz-title").value;
     const categoryId = document.getElementById("category").value;
     const timeLimit = document.getElementById("quiz-time").value;
     {#const passingScore = document.getElementById("quiz-pass").value;#}
 
-    const questionElements = document.querySelectorAll(".question");
+    const questionElements = document.querySelectorAll(".question-card");
     const questions = [];
 
-    const gatherQuestions = async () => {
+    const gatherQuestionsData = async () => {
         for (let questionElement of questionElements) {
-            const questionId = questionElement.dataset.id;
-            const questionText = questionElement.querySelector("input[name='question']").value;
-            const questionImageInput = questionElement.querySelector("input[name='question_image']");
+            const questionId = questionElement.dataset.questionId;
+            const questionText = questionElement.querySelector(".question-text").value;
+            const questionImageInput = questionElement.querySelector(".question-image-input");
             let questionImage = null;
 
             if (questionImageInput && questionImageInput.files.length > 0) {
                 questionImage = await new Promise(resolve => getBase64(questionImageInput.files[0], resolve));
             }
 
-            const optionElements = questionElement.querySelectorAll(".option");
+            const optionElements = questionElement.querySelectorAll(".option-item");
             const options = [];
 
+            const correctRadioName = `correct${questionId || Date.now()}`;
+
             for (let optionElement of optionElements) {
-                const optionId = optionElement.dataset.id;
-                const optionText = optionElement.querySelector("input[name='option']").value;
-                const isCorrect = optionElement.querySelector("input[name='is_correct']").checked;
-                const optionImageInput = optionElement.querySelector("input[name='option_image']");
+                const optionId = optionElement.dataset.optionId;
+                const optionText = optionElement.querySelector(".option-text").value;
+                const isCorrect = optionElement.querySelector(`input[name="${correctRadioName}"]`).checked;
+                const optionImageInput = optionElement.querySelector(".option-image-input");
                 let optionImage = null;
 
                 if (optionImageInput && optionImageInput.files.length > 0) {
@@ -561,7 +532,7 @@ function collectFormDataAndSubmit(quizId) {
         });
     };
 
-    gatherQuestions();
+    gatherQuestionsData();
 }
 
 // Helper to get CSRF token from cookies

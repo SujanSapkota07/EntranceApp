@@ -27,7 +27,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
-
+DATA_UPLOAD_MAX_MEMORY_SIZE = 10 * 1024 * 1024
 # Application definition
 
 INSTALLED_APPS = [
@@ -133,12 +133,3 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
-
-# const
-# title = document.getElementById("quiz-title").value;
-# const
-# categoryId = document.getElementById("category").value;
-# const
-# timeLimit = document.getElementById("quiz-time").value;
-# const
-# passingScore = document.getElementById("quiz-pass").value;
