@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quiz Editor</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
         :root {
             --primary: #4a6bff;
@@ -294,18 +296,50 @@
         }
     </style>
 </head>
+
 <body>
     <div class="container">
         <div class="quiz-header">
-            <input type="text" class="quiz-title" value="Your Quiz Title" placeholder="Enter Quiz Title">
-            <button class="save-btn">Save Quiz</button>
+            <input type="text" class="quiz-title" id="quiz-title" data-quiz-field="title" value="{{ quiz.title }}" placeholder="Enter Quiz Title">
+            <button class="save-btn" type="button" onclick="collectFormDataAndSubmit('{{ quiz.id }}')">Save Quiz</button>
+
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+            <div>
+                <label class="block text-gray-700 font-medium mb-1" for="category">Category</label>
+                <select class="w-full px-4 py-2 border border-gray-300 rounded-lg" id="category" data-quiz-field="category">
+                    <option value="">Select Category</option>
+                    {% if quiz.category %}
+                        <option value="{{ quiz.category.id }}" selected>{{ quiz.category.name }}</option>
+                    {% else %}
+                        <option value="">Select Category</option>
+                    {% endif %}
+                    {% if categories %}
+                        {% for category in categories %}
+                            {% if quiz.category != category %}
+                                <option value="{{ category.id }}">{{ category.name }}</option>
+                            {% endif %}
+                        {% endfor %}
+                    {% endif %}
+                </select>
+            </div>
+
+            <div>
+                <label class="block text-gray-700 font-medium mb-1" for="quiz-time">Time Limit (minutes)</label>
+                <input type="number" class="w-full px-4 py-2 border border-gray-300 rounded-lg" id="quiz-time" data-quiz-field="time_limit" value="{{ quiz.time_limit }}" placeholder="Time Limit (minutes)">
+            </div>
+
+{#            <div>#}
+{#                <label class="block text-gray-700 font-medium mb-1" for="quiz-pass">Passing Score (%)</label>#}
+{#                <input type="number" class="w-full px-4 py-2 border border-gray-300 rounded-lg" id="quiz-pass" data-quiz-field="passing_score" value="{{ quiz.passing_score|default:70 }}" placeholder="Passing Score (%)">#}
+{#            </div>#}
         </div>
 
         <div class="questions-container" id="questionsContainer">
-            <!-- Question 1 -->
-            <div class="question-card">
+            {% for question in questions %}
+            <div class="question-card" data-question-id="{{ question.id }}">
                 <div class="question-header">
-                    <div class="question-number">Question 1</div>
+                    <div class="question-number">Question {{ forloop.counter }}</div>
                     <div class="question-header-btns">
                         <button class="btn btn-danger delete-question" title="Delete Question">
                             <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -318,10 +352,10 @@
                 </div>
                 <div class="question-content">
                     <div class="question-text-container">
-                        <textarea class="question-text" placeholder="Enter your question here...">What is the capital of France?</textarea>
+                        <textarea class="question-text" data-question-field="question_text" placeholder="Enter your question here...">{{ question.question_text }}</textarea>
                         <div>
-                            <input type="file" class="file-input" id="questionImg1" accept="image/*">
-                            <label for="questionImg1" class="btn-upload">
+                            <input type="file" class="file-input question-image-input" data-question-field="image" id="questionImg{{ question.id }}" accept="image/*">
+                            <label for="questionImg{{ question.id }}" class="btn-upload">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                     <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
                                     <circle cx="8.5" cy="8.5" r="1.5"></circle>
@@ -329,48 +363,34 @@
                                 </svg>
                                 Add Image
                             </label>
-                            <!-- Image preview will appear here when uploaded -->
+                            {% if question.image %}
+                                <img src="{{ question.image.url }}" alt="Question Image" class="question-image-preview" style="max-width: 100px; margin-top: 5px;">
+                            {% else %}
+                                <div class="question-image-preview" style="display: none;"></div>
+                            {% endif %}
                         </div>
                     </div>
 
                     <ul class="options-list">
-                        <!-- Option 1 -->
-                        <li class="option-item">
-                            <input type="radio" name="correct1" class="option-correct" checked>
-                            <input type="text" class="option-text" value="Paris" placeholder="Option text">
+                        {% for option in question.options.all %}
+                        <li class="option-item" data-option-id="{{ option.id }}">
+                            <input type="radio" name="correct{{ question.id }}" class="option-correct" data-option-field="is_correct" {% if option.is_correct %}checked{% endif %}>
+                            <input type="text" class="option-text" data-option-field="option_text" value="{{ option.option_text }}" placeholder="Option text">
                             <div class="option-actions">
-                                <input type="file" class="file-input" id="option1Img1" accept="image/*">
-                                <label for="option1Img1" class="btn btn-upload" title="Add Image">
+                                <input type="file" class="file-input option-image-input" data-option-field="image" id="option{{ option.id }}Img{{ question.id }}" accept="image/*">
+                                <label for="option{{ option.id }}Img{{ question.id }}" class="btn btn-upload" title="Add Image">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                         <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
                                         <circle cx="8.5" cy="8.5" r="1.5"></circle>
                                         <polyline points="21 15 16 10 5 21"></polyline>
                                     </svg>
                                 </label>
-                                <button class="btn btn-danger" title="Delete Option">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <line x1="18" y1="6" x2="6" y2="18"></line>
-                                        <line x1="6" y1="6" x2="18" y2="18"></line>
-                                    </svg>
-                                </button>
-                            </div>
-                            <!-- Image preview will be added here -->
-                        </li>
-
-                        <!-- Option 2 -->
-                        <li class="option-item">
-                            <input type="radio" name="correct1" class="option-correct">
-                            <input type="text" class="option-text" value="London" placeholder="Option text">
-                            <div class="option-actions">
-                                <input type="file" class="file-input" id="option2Img1" accept="image/*">
-                                <label for="option2Img1" class="btn btn-upload" title="Add Image">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                                        <circle cx="8.5" cy="8.5" r="1.5"></circle>
-                                        <polyline points="21 15 16 10 5 21"></polyline>
-                                    </svg>
-                                </label>
-                                <button class="btn btn-danger" title="Delete Option">
+                                {% if option.image %}
+                                    <img src="{{ option.image.url }}" alt="Option Image" class="option-image-preview" style="max-width: 80px; margin-left: 5px;">
+                                {% else %}
+                                    <div class="option-image-preview" style="display: none;"></div>
+                                {% endif %}
+                                <button class="btn btn-danger delete-option" title="Delete Option">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                         <line x1="18" y1="6" x2="6" y2="18"></line>
                                         <line x1="6" y1="6" x2="18" y2="18"></line>
@@ -378,21 +398,21 @@
                                 </button>
                             </div>
                         </li>
-
-                        <!-- Option 3 -->
+                        {% empty %}
                         <li class="option-item">
-                            <input type="radio" name="correct1" class="option-correct">
-                            <input type="text" class="option-text" value="Berlin" placeholder="Option text">
+                            <input type="radio" name="correct{{ question.id }}" class="option-correct" data-option-field="is_correct">
+                            <input type="text" class="option-text" data-option-field="option_text" placeholder="Option text">
                             <div class="option-actions">
-                                <input type="file" class="file-input" id="option3Img1" accept="image/*">
-                                <label for="option3Img1" class="btn btn-upload" title="Add Image">
+                                <input type="file" class="file-input option-image-input" data-option-field="image" accept="image/*">
+                                <label for="" class="btn btn-upload" title="Add Image">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                         <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
                                         <circle cx="8.5" cy="8.5" r="1.5"></circle>
                                         <polyline points="21 15 16 10 5 21"></polyline>
                                     </svg>
                                 </label>
-                                <button class="btn btn-danger" title="Delete Option">
+                                <div class="option-image-preview" style="display: none;"></div>
+                                <button class="btn btn-danger delete-option" title="Delete Option">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                         <line x1="18" y1="6" x2="6" y2="18"></line>
                                         <line x1="6" y1="6" x2="18" y2="18"></line>
@@ -400,31 +420,9 @@
                                 </button>
                             </div>
                         </li>
-
-                        <!-- Option 4 -->
-                        <li class="option-item">
-                            <input type="radio" name="correct1" class="option-correct">
-                            <input type="text" class="option-text" value="Rome" placeholder="Option text">
-                            <div class="option-actions">
-                                <input type="file" class="file-input" id="option4Img1" accept="image/*">
-                                <label for="option4Img1" class="btn btn-upload" title="Add Image">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                                        <circle cx="8.5" cy="8.5" r="1.5"></circle>
-                                        <polyline points="21 15 16 10 5 21"></polyline>
-                                    </svg>
-                                </label>
-                                <button class="btn btn-danger" title="Delete Option">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <line x1="18" y1="6" x2="6" y2="18"></line>
-                                        <line x1="6" y1="6" x2="18" y2="18"></line>
-                                    </svg>
-                                </button>
-                            </div>
-                        </li>
+                        {% endfor %}
                     </ul>
 
-                    <!-- Add Option Button -->
                     <button class="btn btn-add add-option">
                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <circle cx="12" cy="12" r="10"></circle>
@@ -435,141 +433,11 @@
                     </button>
                 </div>
             </div>
-
-            <!-- Question 2 -->
-            <div class="question-card">
-                <div class="question-header">
-                    <div class="question-number">Question 2</div>
-                    <div class="question-header-btns">
-                        <button class="btn btn-danger delete-question" title="Delete Question">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M3 6h18"></path>
-                                <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
-                                <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
-                            </svg>
-                        </button>
-                    </div>
-                </div>
-                <div class="question-content">
-                    <div class="question-text-container">
-                        <textarea class="question-text" placeholder="Enter your question here...">Which planet is known as the Red Planet?</textarea>
-                        <div>
-                            <input type="file" class="file-input" id="questionImg2" accept="image/*">
-                            <label for="questionImg2" class="btn-upload">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                                    <circle cx="8.5" cy="8.5" r="1.5"></circle>
-                                    <polyline points="21 15 16 10 5 21"></polyline>
-                                </svg>
-                                Add Image
-                            </label>
-                        </div>
-                    </div>
-
-                    <ul class="options-list">
-                        <!-- Option 1 -->
-                        <li class="option-item">
-                            <input type="radio" name="correct2" class="option-correct">
-                            <input type="text" class="option-text" value="Venus" placeholder="Option text">
-                            <div class="option-actions">
-                                <input type="file" class="file-input" id="option1Img2" accept="image/*">
-                                <label for="option1Img2" class="btn btn-upload" title="Add Image">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                                        <circle cx="8.5" cy="8.5" r="1.5"></circle>
-                                        <polyline points="21 15 16 10 5 21"></polyline>
-                                    </svg>
-                                </label>
-                                <button class="btn btn-danger" title="Delete Option">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <line x1="18" y1="6" x2="6" y2="18"></line>
-                                        <line x1="6" y1="6" x2="18" y2="18"></line>
-                                    </svg>
-                                </button>
-                            </div>
-                        </li>
-
-                        <!-- Option 2 -->
-                        <li class="option-item">
-                            <input type="radio" name="correct2" class="option-correct" checked>
-                            <input type="text" class="option-text" value="Mars" placeholder="Option text">
-                            <div class="option-actions">
-                                <input type="file" class="file-input" id="option2Img2" accept="image/*">
-                                <label for="option2Img2" class="btn btn-upload" title="Add Image">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                                        <circle cx="8.5" cy="8.5" r="1.5"></circle>
-                                        <polyline points="21 15 16 10 5 21"></polyline>
-                                    </svg>
-                                </label>
-                                <button class="btn btn-danger" title="Delete Option">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <line x1="18" y1="6" x2="6" y2="18"></line>
-                                        <line x1="6" y1="6" x2="18" y2="18"></line>
-                                    </svg>
-                                </button>
-                            </div>
-                        </li>
-
-                        <!-- Option 3 -->
-                        <li class="option-item">
-                            <input type="radio" name="correct2" class="option-correct">
-                            <input type="text" class="option-text" value="Jupiter" placeholder="Option text">
-                            <div class="option-actions">
-                                <input type="file" class="file-input" id="option3Img2" accept="image/*">
-                                <label for="option3Img2" class="btn btn-upload" title="Add Image">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                                        <circle cx="8.5" cy="8.5" r="1.5"></circle>
-                                        <polyline points="21 15 16 10 5 21"></polyline>
-                                    </svg>
-                                </label>
-                                <button class="btn btn-danger" title="Delete Option">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <line x1="18" y1="6" x2="6" y2="18"></line>
-                                        <line x1="6" y1="6" x2="18" y2="18"></line>
-                                    </svg>
-                                </button>
-                            </div>
-                        </li>
-
-                        <!-- Option 4 -->
-                        <li class="option-item">
-                            <input type="radio" name="correct2" class="option-correct">
-                            <input type="text" class="option-text" value="Mercury" placeholder="Option text">
-                            <div class="option-actions">
-                                <input type="file" class="file-input" id="option4Img2" accept="image/*">
-                                <label for="option4Img2" class="btn btn-upload" title="Add Image">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                                        <circle cx="8.5" cy="8.5" r="1.5"></circle>
-                                        <polyline points="21 15 16 10 5 21"></polyline>
-                                    </svg>
-                                </label>
-                                <button class="btn btn-danger" title="Delete Option">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <line x1="18" y1="6" x2="6" y2="18"></line>
-                                        <line x1="6" y1="6" x2="18" y2="18"></line>
-                                    </svg>
-                                </button>
-                            </div>
-                        </li>
-                    </ul>
-
-                    <!-- Add Option Button -->
-                    <button class="btn btn-add add-option">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <circle cx="12" cy="12" r="10"></circle>
-                            <line x1="12" y1="8" x2="12" y2="16"></line>
-                            <line x1="8" y1="12" x2="16" y2="12"></line>
-                        </svg>
-                        Add Option
-                    </button>
-                </div>
-            </div>
+            {% empty %}
+            <div class="text-gray-500">No questions yet. Click "Add New Question" to start.</div>
+            {% endfor %}
         </div>
 
-        <!-- Add Question Button -->
         <button class="add-question-btn" id="addQuestionBtn">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <circle cx="12" cy="12" r="10"></circle>
@@ -580,3 +448,137 @@
         </button>
     </div>
 </body>
+<script>
+function getBase64(file, callback) {
+    const reader = new FileReader();
+    reader.onload = () => callback(reader.result);
+    reader.readAsDataURL(file);
+}
+
+function gatherQuestions() {
+    const questionElements = document.querySelectorAll('.question-block');
+    const questions = [];
+
+    questionElements.forEach((qEl, index) => {
+        const questionText = qEl.querySelector('.question-text').value;
+        const optionInputs = qEl.querySelectorAll('.option-input');
+        const correctOption = qEl.querySelector('input[type="radio"]:checked');
+
+        const options = [];
+
+
+        optionInputs.forEach((optInput, idx) => {
+            options.push({
+                text: optInput.value,
+                is_correct: correctOption && correctOption.value == idx.toString()
+            });
+        });
+
+        questions.push({
+            text: questionText,
+            options: options
+        });
+    });
+
+    return questions;
+}
+
+
+
+function collectFormDataAndSubmit(quizId) {
+    const title = document.getElementById("quiz-title").value;
+    const categoryId = document.getElementById("category").value;
+    const timeLimit = document.getElementById("quiz-time").value;
+    {#const passingScore = document.getElementById("quiz-pass").value;#}
+
+    const questionElements = document.querySelectorAll(".question");
+    const questions = [];
+
+    const gatherQuestions = async () => {
+        for (let questionElement of questionElements) {
+            const questionId = questionElement.dataset.id;
+            const questionText = questionElement.querySelector("input[name='question']").value;
+            const questionImageInput = questionElement.querySelector("input[name='question_image']");
+            let questionImage = null;
+
+            if (questionImageInput && questionImageInput.files.length > 0) {
+                questionImage = await new Promise(resolve => getBase64(questionImageInput.files[0], resolve));
+            }
+
+            const optionElements = questionElement.querySelectorAll(".option");
+            const options = [];
+
+            for (let optionElement of optionElements) {
+                const optionId = optionElement.dataset.id;
+                const optionText = optionElement.querySelector("input[name='option']").value;
+                const isCorrect = optionElement.querySelector("input[name='is_correct']").checked;
+                const optionImageInput = optionElement.querySelector("input[name='option_image']");
+                let optionImage = null;
+
+                if (optionImageInput && optionImageInput.files.length > 0) {
+                    optionImage = await new Promise(resolve => getBase64(optionImageInput.files[0], resolve));
+                }
+
+                options.push({
+                    id: optionId,
+                    text: optionText,
+                    isCorrect: isCorrect,
+                    image: optionImage
+                });
+            }
+
+            questions.push({
+                id: questionId,
+                text: questionText,
+                image: questionImage,
+                options: options
+            });
+        }
+
+        const quizData = {
+            title: title,
+            categoryId: categoryId,
+            timeLimit: parseInt(timeLimit),
+            {#passingScore: parseInt(passingScore),#}
+            questions: questions
+        };
+
+        fetch(`/save_quiz/${quizId}/`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": getCookie('csrftoken')
+            },
+            body: JSON.stringify(quizData)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === "success") {
+                alert("Quiz saved successfully!");
+            } else {
+                alert("Error: " + data.message);
+            }
+        });
+    };
+
+    gatherQuestions();
+}
+
+// Helper to get CSRF token from cookies
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== "") {
+        const cookies = document.cookie.split(";");
+
+        for (let cookie of cookies) {
+            cookie = cookie.trim();
+
+            if (cookie.substring(0, name.length + 1) === (name + "=")) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+</script>

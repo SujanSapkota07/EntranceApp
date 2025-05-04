@@ -133,3 +133,12 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+
+# const
+# title = document.getElementById("quiz-title").value;
+# const
+# categoryId = document.getElementById("category").value;
+# const
+# timeLimit = document.getElementById("quiz-time").value;
+# const
+# passingScore = document.getElementById("quiz-pass").value;

@@ -10,12 +10,10 @@ urlpatterns = [
     path('create_quiz/', view.create_quiz, name='create_quiz'),
     path('upload/', view.upload_quiz, name='upload_quiz'),
     path('mydashboard/', view.mydashboard, name='mydashboard'),
-    path('quiz/view/<uuid:quiz_id>/', view.view_quiz, name='view_quiz')
-
-    
-
-
-
+    path('quiz/view/<uuid:quiz_id>/', view.view_quiz, name='view_quiz'),
+    path('quiz/edit/<uuid:quiz_id>/', view.edit_quiz, name='edit_quiz'),
+    path('save_quiz/<uuid:quiz_id>/', view.save_quiz, name='save_quiz'),
+]
 
 #     # When visiting /quizzes/, call quiz_list() function
 #     path('quiz-list/', viewset.quiz_list, name='quiz-list'),
@@ -45,4 +43,4 @@ urlpatterns = [
 # BY CHATGPT
     # path('upload/', viewset.upload_mcqs, name='upload_mcqs'),
     # path('play/', viewset.play_mcqs, name='play_mcqs'),
-]
+

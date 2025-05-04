@@ -125,12 +125,18 @@
 <body class="bg-gray-50 min-h-screen">
     <div class="container mx-auto px-4 py-8">
         <!-- Header -->
-        <header class="flex justify-between items-center mb-8">
-            <h1 class="text-3xl font-bold text-indigo-700">Quiz Management Dashboard</h1>
-            <button id="createQuizBtn" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg flex items-center">
-                <i class="fas fa-plus mr-2"></i> Create New Quiz
-            </button>
-        </header>
+        <header class="flex justify-end items-center mb-8">
+    <h1 class="text-3xl font-bold text-indigo-700 mr-auto">Quiz Management Dashboard</h1>
+
+            <a href="{% url 'home' %}" class="back-btn inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 no-underline">
+            <button id="backBtn" class="bg-gray-300 hover:bg-gray-400 text-gray-700 px-4 py-2 rounded-lg flex items-center mr-2">
+        <i class="fas fa-arrow-left mr-2"></i> Back
+    </button>
+            </a>
+    <button id="createQuizBtn" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg flex items-center">
+        <i class="fas fa-plus mr-2"></i> Create New Quiz
+    </button>
+</header>
 
         <!-- Main Content -->
         <div class="container">

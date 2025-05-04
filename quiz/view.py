@@ -1,16 +1,20 @@
-from django.shortcuts import render, get_object_or_404
 import json
+from .models import Category
+from django.shortcuts import render, get_object_or_404
+from django.http import JsonResponse
+from django.core.files.base import ContentFile
+from django.views.decorators.http import require_POST
+from django.core.exceptions import ValidationError
+from django.db import transaction
+from .models import Quiz, Question, Option
+import base64
 from django.http import HttpResponse
 from django.shortcuts import render
 from django.shortcuts import render, redirect
 from django.contrib.auth.models import User
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
-from rest_framework.decorators import api_view, permission_classes   
-from rest_framework.permissions import IsAuthenticated  # To make views support HTTP methods like GET, POST etc.
-from rest_framework.response import Response           # To send HTTP responses in JSON format
-from rest_framework import status     
-# Import models and serializers
+from django.db.models import Count
 from .models import Quiz, Question, User, Option    # Our Quiz model
 from .serializers import QuizSerializer, QuestionSerializer             # Serializer for Quiz model
 from rest_framework.authtoken.models import Token
@@ -99,7 +103,6 @@ def create_quiz(request):
 
 
 """ this is the dashboard of the quiz app."""
-from django.db.models import Count
 def mydashboard(request):
     if request.method == 'GET':
         user = request.user
@@ -113,7 +116,7 @@ def mydashboard(request):
     return render(request, 'quiz/dashboard.html', context)
 
 
-from .models import Category
+
 def view_quiz(request, quiz_id):
     quiz= Quiz.objects.get(id=quiz_id)
     questions = get_questions_by_quiz(quiz_id)
@@ -125,6 +128,83 @@ def view_quiz(request, quiz_id):
     })
 
 
+def edit_quiz(request, quiz_id):
+    """
+    Renders the quiz editor page with existing questions and options.
+    """
+    quiz = get_object_or_404(Quiz, id=quiz_id)
+    questions = quiz.questions.all().prefetch_related('options')
+    categories = Category.objects.all()
+
+    context = {
+        'quiz': quiz,
+        'questions': questions,
+        'categories': categories,
+    }
+    return render(request, 'quiz/quiz-editor-page.html', context)
+import base64
+import uuid
+from django.core.files.base import ContentFile
+from django.views.decorators.csrf import csrf_exempt
+from django.http import JsonResponse
+import json
+from .models import Quiz, Question, Option, Category
+
+@csrf_exempt
+def save_quiz(request, quiz_id):
+    if request.method == "POST":
+        try:
+            data = json.loads(request.body.decode('utf-8'))
+            quiz = Quiz.objects.get(id=quiz_id)
+
+            quiz.title = data.get("title", quiz.title)
+            quiz.time_limit = data.get("timeLimit", quiz.time_limit)
+            # quiz.passing_score = data.get("passingScore", quiz.passing_score)
+
+            category_id = data.get("categoryId")
+            if category_id:
+                try:
+                    quiz.category = Category.objects.get(id=category_id)
+                except Category.DoesNotExist:
+                    pass
+
+            quiz.save()
+
+            for q_data in data.get("questions", []):
+                question_id = q_data.get("id")
+                question = Question.objects.filter(id=question_id).first() if question_id else Question()
+                question.quiz = quiz
+                question.question_text = q_data.get("text", "")
+
+                image_data = q_data.get("image")
+                if image_data:
+                    format, imgstr = image_data.split(';base64,')
+                    ext = format.split('/')[-1]
+                    image_name = f"{uuid.uuid4()}.{ext}"
+                    question.image.save(image_name, ContentFile(base64.b64decode(imgstr)), save=False)
+
+                question.save()
+
+                for o_data in q_data.get("options", []):
+                    option_id = o_data.get("id")
+                    option = Option.objects.filter(id=option_id).first() if option_id else Option()
+                    option.question = question
+                    option.option_text = o_data.get("text", "")
+                    option.is_correct = o_data.get("isCorrect", False)
+
+                    image_data = o_data.get("image")
+                    if image_data:
+                        format, imgstr = image_data.split(';base64,')
+                        ext = format.split('/')[-1]
+                        image_name = f"{uuid.uuid4()}.{ext}"
+                        option.image.save(image_name, ContentFile(base64.b64decode(imgstr)), save=False)
+
+                    option.save()
+
+            return JsonResponse({"status": "success"})
+
+        except Exception as e:
+            return JsonResponse({"status": "error", "message": str(e)})
 
 from .utils import import_quiz_from_file
 def upload_quiz(request):
