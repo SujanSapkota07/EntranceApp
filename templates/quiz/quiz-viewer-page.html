@@ -269,7 +269,7 @@
     </svg>
     Back to Quizzes
 </a>
-
+                {% if user.is_authenticated and user.id == quiz.created_by.id %}
                 <a href="{% url 'edit_quiz' quiz.id %}" style=" text-decoration: none; color: inherit;">
                 <button class="edit-btn">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -279,6 +279,7 @@
                     Edit Quiz
                 </button>
                 </a>
+                {% endif %}
             </div>
         </div>
 

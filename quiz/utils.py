@@ -1,4 +1,7 @@
 import re
+
+from django.template.defaultfilters import title
+
 from .models import Quiz, Question, Option
 
 from .models import Question
@@ -15,10 +18,10 @@ def import_quiz_from_file(file_obj, created_by_user):
 
     # Clean lines
     lines = [line.strip() for line in lines if line.strip()]
-
+    filename = file_obj.name
     # Create the quiz
     quiz = Quiz.objects.create(
-        title="Imported Quiz",
+        title=filename[:15],
         description="Quiz imported from file.",
         created_by=created_by_user
     )

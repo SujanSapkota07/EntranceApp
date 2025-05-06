@@ -5,9 +5,124 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CustomQZ - Create Your Unique Quiz</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
     <style>
         /* ===== GLOBAL STYLES ===== */
         /* Reset default browser styling */
+        .quiz-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+        .question-item:hover {
+            background-color: #f8fafc;
+        }
+        .fade-in {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .slide-in {
+            animation: slideIn 0.3s ease-in-out;
+        }
+        @keyframes slideIn {
+            from { transform: translateX(100%); }
+            to { transform: translateX(0); }
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f5f6fa;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .search-bar {
+            width: 100%;
+            padding: 12px 20px;
+            margin-bottom: 2rem;
+            border: 1px solid #dcdde1;
+            border-radius: 8px;
+            font-size: 16px;
+        }
+
+        .quiz-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .quiz-card {
+            background: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+        }
+
+        .quiz-card:hover {
+            transform: translateY(-2px);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .quiz-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: #2d3436;
+        }
+
+        .status-badge {
+            font-size: 0.8rem;
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+
+        .published {
+            background: #e3fcef;
+            color: #006644;
+        }
+
+        .draft {
+            background: #f1f3f4;
+            color: #5f6368;
+        }
+
+        .category {
+            color: #636e72;
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .description {
+            color: #57606f;
+            font-size: 0.95rem;
+            margin-bottom: 1rem;
+            line-height: 1.4;
+        }
+
+        .metadata {
+            display: flex;
+            justify-content: space-between;
+            color: #747d8c;
+            font-size: 0.9rem;
+        }
         * {
             margin: 0;
             padding: 0;
@@ -73,15 +188,34 @@
             margin-left: 15px;
         }
 
-        /* ===== MAIN CONTENT STYLES ===== */
-        .main-content {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 40px 20px;
-        }
+       html, body {
+    height: 100%;
+    margin: 0;
+    overflow: auto;
+}
+
+body {
+    display: flex; /* Added */
+    flex-direction: column; /* Added */
+    min-height: 100vh; /* Added */
+}
+
+.main-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    height: auto; /* Changed from 100vh to auto */
+    box-sizing: border-box;
+    overflow: auto;
+}
+
+.footer {
+  margin-top: auto;
+}
+
 
         .content-container {
             display: flex;
@@ -266,7 +400,7 @@
     </header>
 
     <!-- Main Content Section -->
-    <main class="main-content">
+    <main class="main-content ">
         <div class="content-container">
             <!-- Left Side - Text Content -->
             <div class="text-content">
@@ -296,7 +430,25 @@
             </div>
         </div>
     </main>
+    {%if user.is_authenticated%}
+    <div class="quiz-grid">
+                {% for quiz in quizzes %}
+                <a href="{% url 'view_quiz' quiz.id %}" style="text-decoration: none; color: inherit;">
 
+                <div class="quiz-card">
+                    <div class="card-header">
+                        <h3 class="quiz-title">{{quiz.title}}</h3>
+                        <span class="status-badge published">Active</span>
+                    </div>
+                    <p class="category">{{quiz.created_at}}</p>
+                    <p class="description">{{quiz.description}}</p>
+                    <div class="metadata">
+                        <span>📚 {{quiz.question_count}}</span>
+                    </div>
+                </div></a>
+                    {% endfor %}
+            </div>
+{% endif %}
     <!-- Footer Section -->
     <!-- <footer class="footer">
         <div class="site-url">customqz.com</div>

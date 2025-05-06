@@ -26,8 +26,10 @@ from .utils import get_questions_by_quiz
 """ landing page of the quiz app"""
 def quiz_landing(request):
     user = request.user
+    quizzes = Quiz.objects.all().annotate(question_count=Count('questions')).order_by('-created_at')[:5]
     context = {
         'user': user,
+        'quizzes': quizzes,
     }
     return render(request, 'quiz/landing.html', context)
 
@@ -119,10 +121,12 @@ def mydashboard(request):
 
 def view_quiz(request, quiz_id):
     quiz= Quiz.objects.get(id=quiz_id)
+    user = request.user
     questions = get_questions_by_quiz(quiz_id)
     count = questions.count()
     return render(request, 'quiz/quiz-viewer-page.html', {
         'quiz': quiz,
+        'user': user,
         'questions': questions,
         'count': count
     })
