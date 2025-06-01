@@ -15,15 +15,15 @@ from django.contrib.auth.models import User
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.db.models import Count
-from .models import Quiz, Question, User, Option    # Our Quiz model
-from .serializers import QuizSerializer, QuestionSerializer             # Serializer for Quiz model
+from .models import Quiz, Question, User, Option  # Our Quiz model
+from .serializers import QuizSerializer, QuestionSerializer  # Serializer for Quiz model
 from rest_framework.authtoken.models import Token
 from django.contrib.auth import authenticate
 from .utils import get_questions_by_quiz
 
-
-
 """ landing page of the quiz app"""
+
+
 def quiz_landing(request):
     user = request.user
     quizzes = Quiz.objects.all().annotate(question_count=Count('questions')).order_by('-created_at')[:5]
@@ -33,7 +33,10 @@ def quiz_landing(request):
     }
     return render(request, 'quiz/landing.html', context)
 
+
 """login """
+
+
 def login_user(request):
     if request.method == 'POST':
         email = request.POST.get('email')
@@ -66,6 +69,8 @@ def login_user(request):
 
 
 """signup """
+
+
 def signup_user(request):
     if request.method == "POST":
         name = request.POST.get("name")
@@ -91,20 +96,29 @@ def signup_user(request):
 
     return render(request, "quiz/login.html")
 
+
 """ logout """
+
+
 def logout_user(request):
     logout(request)
     return redirect('home')  # Change 'home' to your home page route
 
+
 def find_quiz(request):
     pass
 
+
 """ creating a new quiz """
+
+
 def create_quiz(request):
     return render(request, 'quiz/create_quiz.html')
 
 
 """ this is the dashboard of the quiz app."""
+
+
 def mydashboard(request):
     if request.method == 'GET':
         user = request.user
@@ -118,9 +132,8 @@ def mydashboard(request):
     return render(request, 'quiz/dashboard.html', context)
 
 
-
 def view_quiz(request, quiz_id):
-    quiz= Quiz.objects.get(id=quiz_id)
+    quiz = Quiz.objects.get(id=quiz_id)
     user = request.user
     questions = get_questions_by_quiz(quiz_id)
     count = questions.count()
@@ -146,6 +159,8 @@ def edit_quiz(request, quiz_id):
         'categories': categories,
     }
     return render(request, 'quiz/quiz-editor-page.html', context)
+
+
 import base64
 import uuid
 from django.core.files.base import ContentFile
@@ -153,6 +168,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 import json
 from .models import Quiz, Question, Option, Category
+
 
 @csrf_exempt
 def save_quiz(request, quiz_id):
@@ -173,7 +189,6 @@ def save_quiz(request, quiz_id):
                     pass
 
             quiz.save()
-
             for q_data in data.get("questions", []):
                 question_id = q_data.get("id")
                 question = Question.objects.filter(id=question_id).first() if question_id else Question()
@@ -187,9 +202,9 @@ def save_quiz(request, quiz_id):
                     image_name = f"{uuid.uuid4()}.{ext}"
                     question.image.save(image_name, ContentFile(base64.b64decode(imgstr)), save=False)
 
-                question.save()
-
                 for o_data in q_data.get("options", []):
+                    if not o_data.get("text", ""):
+                        continue
                     option_id = o_data.get("id")
                     option = Option.objects.filter(id=option_id).first() if option_id else Option()
                     option.question = question
@@ -204,13 +219,17 @@ def save_quiz(request, quiz_id):
                         option.image.save(image_name, ContentFile(base64.b64decode(imgstr)), save=False)
 
                     option.save()
+                question.save()
 
             return JsonResponse({"status": "success"})
 
         except Exception as e:
             return JsonResponse({"status": "error", "message": str(e)})
 
+
 from .utils import import_quiz_from_file
+
+
 def upload_quiz(request):
     if request.method == 'POST' and request.FILES.get('file'):
         file = request.FILES['file']
@@ -218,7 +237,6 @@ def upload_quiz(request):
         import_quiz_from_file(file, user)
         return redirect('home')  # or wherever you want
     return render(request, 'quiz/upload.html')
-
 
 # # here we will create endpoint for our quiz app
 
@@ -232,8 +250,7 @@ def upload_quiz(request):
 #     return Response(serializer.data)
 
 
-
-# """ 
+# """
 # this function now partially shows the qualities of the quiz. 
 # makes a user ready for the quiz, shows details like number 
 # of questions, created by, etc.
@@ -261,9 +278,6 @@ def upload_quiz(request):
 #     return Response(data)
 
 
-
-
-
 # @api_view(['GET'])
 # @permission_classes([IsAuthenticated])
 # # when quiz_detail is called, it will show all the questions related to that quiz
@@ -279,8 +293,6 @@ def upload_quiz(request):
 #     return Response(serializer.data)
 
 
-
-
 # # # this function is for testing purpose only
 # # from django.shortcuts import render
 # # from .models import Quiz
@@ -289,7 +301,7 @@ def upload_quiz(request):
 # #     # Assuming you have a Quiz model with a related Question model
 # #     quiz = Quiz.objects.get(id=pk)
 # #     questions = quiz.questions.all()
-    
+
 # #     # Prepare question data for passing into the template
 # #     questions_data = []
 # #     for question in questions:
@@ -303,17 +315,15 @@ def upload_quiz(request):
 # #             } for option in options],
 # #         }
 # #         questions_data.append(question_data)
-    
-    
+
+
 # #     # Pass questions data as JSON
 # #     return render(request, 'quiz/questions.html', {
 # #         'questions_json': json.dumps(questions_data),
 # #     })
 
 
-
-
-# """ this is the main function for the quiz app. 
+# """ this is the main function for the quiz app.
 # it will show the landing page of the quiz app."""
 # @api_view(['GET', 'POST'])
 # def quiz(request):
@@ -324,21 +334,21 @@ def upload_quiz(request):
 #         if not quiz_code:
 #             return Response({'error': 'Quiz code is required'}, status=status.HTTP_400_BAD_REQUEST)
 #         # if code not found
-        
+
 #         try:
 #             quiz = Quiz.objects.get(id=quiz_code)
 #             serializer = QuizSerializer(quiz)
 #             return Response(serializer.data, status=status.HTTP_200_OK)
 #         except Quiz.DoesNotExist:
 #             return Response({'error': 'Quiz not found'}, status=status.HTTP_404_NOT_FOUND)
-    
+
 #     elif request.method == 'POST':
 #         # This is for "+ Create New"
 #         # We assume the frontend will POST a JSON like { "title": "My Quiz Title" }
 #         title = request.data.get('title', 'Untitled Quiz')
 #         description = request.data.get('description', '')
 #         user = request.user if request.user.is_authenticated else None  # depends if you have login
-        
+
 #         quiz = Quiz.objects.create(
 #             title=title,
 #             description=description,
@@ -346,8 +356,6 @@ def upload_quiz(request):
 #         )
 #         serializer = QuizSerializer(quiz)
 #         return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-
 
 
 # @api_view(['POST'])
@@ -358,7 +366,7 @@ def upload_quiz(request):
 #     # username and password are required
 #     if not username or not password:
 #         return Response({'error': 'Username and password are required.'}, status=status.HTTP_400_BAD_REQUEST)
-    
+
 #     # authenticate the user
 #     user = authenticate(username=username, password=password)
 #     if user is not None:
@@ -372,15 +380,13 @@ def upload_quiz(request):
 # def signup(request):
 #     username = request.data.get('username')
 #     password = request.data.get('password')
-    
+
 #     if User.objects.filter(username=username).exists():
 #         return Response({'error': 'Username already exists.'}, status=status.HTTP_400_BAD_REQUEST)
-    
+
 #     user = User.objects.create_user(username=username, password=password)
 #     token, created = Token.objects.get_or_create(user=user)
 #     return Response({'token': token.key}, status=status.HTTP_201_CREATED)
-
-
 
 
 # """
